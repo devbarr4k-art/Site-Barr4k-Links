@@ -73,7 +73,7 @@ export const defaultConfig: PageConfig = {
     name: "BARR4K",
     handle: "@barr4k",
     bio: "Mercado financeiro, todos os dias. Análises, lives e comunidade.",
-    avatar: "/avatar-v2.png",
+    avatar: "/avatar-v3.jpg",
     verified: true,
     heroVideo: "/hero.mp4",
     heroVideoMobile: "",

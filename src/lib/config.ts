@@ -133,6 +133,8 @@ const RETIRED_IMAGES: Record<string, string> = {
   "/logo-fallen-w.png": "/logo-fallen-v4.png",
   "/logo-fallen-v3.png": "/logo-fallen-v4.png",
 };
+// Avatares antigos (desenho) trocados pela foto: o que foi salvo com eles passa a mostrar a foto
+const RETIRED_AVATARS: Record<string, string> = { "/avatar.png": "/avatar-v3.jpg", "/avatar-v2.png": "/avatar-v3.jpg" };
 const linkImage = (v: unknown) => {
   const u = safeUrl(v);
   return RETIRED_IMAGES[u] ?? (u || undefined);
@@ -161,7 +163,7 @@ export function sanitizeConfig(raw: unknown): PageConfig {
       name: str(p.name, 60) || d.name,
       handle: str(p.handle, 40),
       bio: str(p.bio, 200),
-      avatar: safeUrl(p.avatar) || d.avatar,
+      avatar: RETIRED_AVATARS[safeUrl(p.avatar)] ?? (safeUrl(p.avatar) || d.avatar),
       verified: p.verified === undefined ? d.verified : !!p.verified,
       heroVideo: safeUrl(p.heroVideo),
       heroVideoMobile: safeUrl(p.heroVideoMobile),
