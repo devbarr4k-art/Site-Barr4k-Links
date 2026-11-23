@@ -184,7 +184,7 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={l.image} alt="" className="h-9 w-16 object-contain rounded-md bg-[#0d0c16] border border-white/10 p-1 shrink-0" />
                 )}
-                <input className="field text-sm" placeholder="Logo no lugar do ícone (opcional)" value={l.image ?? ""} onChange={(e) => editLink(i, { image: e.target.value })} />
+                <input className="field text-sm" placeholder="Logo no lugar do ícone: PNG branco, fundo transparente (opcional)" value={l.image ?? ""} onChange={(e) => editLink(i, { image: e.target.value })} />
                 <UploadBtn id={`link-${i}`} kind="image" label="Logo" onUrl={(u) => editLink(i, { image: u })} />
               </div>
               <div className="flex flex-col sm:flex-row gap-2">

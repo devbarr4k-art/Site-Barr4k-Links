@@ -131,22 +131,16 @@ body { background: var(--bg); color: var(--text); }
   pointer-events: none;
 }
 
-/* Logo do parceiro no lugar do ícone: caixa deitada escura, logo inteira dentro */
+/* Logo do parceiro no lugar do ícone: branca e pequena, como os ícones (estilo do site do Vitinho) */
 .link-logo {
-  width: 4.75rem;
-  height: 2.6rem;
+  height: 1.2rem;
+  width: auto;
+  max-width: 5rem;
   flex-shrink: 0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: .3rem .4rem;
-  background: #0d0c16;
-  border: 1px solid rgba(139, 61, 255, .25);
-  overflow: hidden;
+  object-fit: contain;
   pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(176, 124, 255, .35));
 }
-.link-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 .link-card.is-highlight {
   background: linear-gradient(135deg, #9a4dff, #5b21d6);

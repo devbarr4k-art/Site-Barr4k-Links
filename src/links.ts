@@ -75,9 +75,9 @@ export const defaultConfig: PageConfig = {
   links: [
     { label: "Assistir a live", sub: "twitch.tv/barr4k", url: "https://www.twitch.tv/barr4k", icon: "twitch", highlight: true },
     { label: "Sorteios de skins", sub: "Entrada grátis com a Twitch", url: "https://www.barr4k.com/", icon: "gift" },
-    { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", image: "/logo-csgoroll.png", code: "BARRAK" },
-    { label: "CSGOBig", sub: "3 caixas grátis + 5% de bônus", url: "https://csgobig.com/#!/r/barr4k", icon: "coin", image: "/logo-csgobig.png", code: "BARR4K" },
-    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", image: "/logo-fallen.png", code: "BARR4K" },
+    { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", image: "/logo-csgoroll-w.png", code: "BARRAK" },
+    { label: "CSGOBig", sub: "3 caixas grátis + 5% de bônus", url: "https://csgobig.com/#!/r/barr4k", icon: "coin", image: "/logo-csgobig-w.png", code: "BARR4K" },
+    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", image: "/logo-fallen-w.png", code: "BARR4K" },
     { label: "YouTube", sub: "Cortes e melhores momentos", url: "https://www.youtube.com/@barr4k", icon: "youtube" },
     { label: "Instagram", sub: "@barr4k", url: "https://www.instagram.com/barr4k", icon: "instagram" },
     { label: "BB Agency", sub: "Minha agência de streamers", url: "https://www.bbagency.net", icon: "site", image: "/logo-bb.png" },

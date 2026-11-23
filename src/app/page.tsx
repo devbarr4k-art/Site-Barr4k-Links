@@ -64,10 +64,8 @@ export default async function Home() {
                   {/* o link cobre o cartão todo; o botão de copiar fica por cima dele */}
                   <a {...linkProps(l.url)} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={l.label} />
                   {l.image ? (
-                    <span className="link-logo">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={l.image} alt="" />
-                    </span>
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={l.image} alt="" className="link-logo" />
                   ) : Icon && (
                     <span className="link-icon">
                       <Icon className="w-5 h-5" />
