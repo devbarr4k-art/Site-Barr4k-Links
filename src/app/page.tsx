@@ -118,7 +118,7 @@ export default async function Home() {
         {/* Por que acompanhar */}
         {highlights.length > 0 && (
           <section className="mt-14 w-full">
-            <h2 className="section-title">Por que colar na live</h2>
+            <h2 className="section-title">Por que colar na live?</h2>
             {/* 1º cartão largo com a arte ao fundo e selo "ao vivo"; os outros lado a lado */}
             <div className="mt-4 grid grid-cols-2 gap-3">
               {highlights.map((h, i) => {
