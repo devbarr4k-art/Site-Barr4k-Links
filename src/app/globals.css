@@ -1,0 +1,333 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TEMA — Barr4k: noite azul-marinho da arte (BMW + Fuji) com o roxo da marca
+   ============================================================ */
+:root {
+  --bg: #07060d;          /* fundo da página */
+  --surface: #110f1c;     /* fundo dos cartões */
+  --border: #262043;      /* bordas */
+  --text: #f3f1fb;        /* texto principal */
+  --muted: #a39dbb;       /* texto secundário */
+  --accent: #8b3dff;      /* roxo Barr4k */
+  --accent-2: #b07cff;    /* roxo claro (brilho, @) */
+  --accent-text: #ffffff;
+  --radius: 16px;
+}
+
+@theme {
+  --font-sans: var(--font-main), ui-sans-serif, system-ui, sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); }
+
+/* Fundo: brilho roxo/azul, como a névoa da arte */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 40% at 50% 38%, rgba(139, 61, 255, .14), transparent 70%),
+    radial-gradient(55% 35% at 100% 85%, rgba(56, 82, 200, .16), transparent 70%),
+    radial-gradient(45% 30% at 0% 65%, rgba(139, 61, 255, .10), transparent 70%),
+    var(--bg);
+}
+
+/* ---------- Capa ---------- */
+.cover {
+  position: relative;
+  height: 46svh;
+  min-height: 300px;
+  max-height: 520px;
+  overflow: hidden;
+  /* some no fundo de verdade (sem emenda com o brilho fixo da pagina) */
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 98%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 98%);
+}
+.cover.is-empty { height: 180px; min-height: 0; }
+.cover-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* no celular a arte deitada é cortada: foca no Barr4k e no carro */
+  object-position: 58% 60%;
+  pointer-events: none;
+}
+.cover-fade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(7, 6, 13, .55), transparent 22%),
+    linear-gradient(to top, rgba(7, 6, 13, .7) 10%, transparent 55%),
+    linear-gradient(to bottom, rgba(139, 61, 255, .18), rgba(56, 82, 200, .10));
+}
+@media (min-width: 900px) { .cover { height: 58vh; max-height: 640px; } .cover-media { object-position: center 62%; } }
+
+/* ---------- Perfil ---------- */
+.avatar {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: var(--surface);
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 5px var(--bg), 0 0 40px rgba(139, 61, 255, .6);
+}
+
+.name {
+  font-family: var(--font-title), sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: 2.1rem;
+  line-height: 1;
+  letter-spacing: -.01em;
+}
+.verified { width: 1.5rem; height: 1.5rem; color: #3ea6ff; filter: drop-shadow(0 0 8px rgba(62, 166, 255, .5)); }
+
+.social-btn {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 15, 28, .8);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: color .15s, border-color .15s, transform .15s, box-shadow .15s;
+}
+.social-btn:hover { color: #fff; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 0 18px rgba(139, 61, 255, .45); }
+
+/* ---------- Botões ---------- */
+.link-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .8rem .95rem;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(24, 21, 40, .92), rgba(15, 13, 26, .92));
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.link-card:hover { border-color: rgba(139, 61, 255, .7); transform: translateY(-2px); box-shadow: 0 12px 30px -14px rgba(139, 61, 255, .7); }
+
+.link-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-2);
+  background: rgba(139, 61, 255, .12);
+  border: 1px solid rgba(139, 61, 255, .25);
+  pointer-events: none;
+}
+
+.link-card.is-highlight {
+  background: linear-gradient(135deg, #9a4dff, #5b21d6);
+  border-color: #b27dff;
+  color: var(--accent-text);
+  animation: pulse-purple 2.6s ease-in-out infinite;
+}
+.link-card.is-highlight .link-icon { color: #fff; background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .22); }
+.link-card.is-highlight:hover { filter: brightness(1.08); }
+
+@keyframes pulse-purple {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 61, 255, .55), 0 14px 34px -16px rgba(139, 61, 255, .9); }
+  50% { box-shadow: 0 0 0 7px rgba(139, 61, 255, 0), 0 14px 34px -16px rgba(139, 61, 255, .9); }
+}
+
+/* Chip do código (copiar) */
+.code-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .4rem .6rem;
+  border-radius: 10px;
+  border: 1px dashed rgba(176, 124, 255, .6);
+  background: rgba(139, 61, 255, .12);
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.code-chip:hover { background: rgba(139, 61, 255, .25); border-color: var(--accent-2); }
+.code-chip.is-done { border-style: solid; border-color: #34d399; background: rgba(52, 211, 153, .15); }
+.code-chip-label { font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.code-chip.is-done .code-chip-label { color: #6ee7b7; }
+/* celular: sem a palavra "Codigo" no chip, pra sobrar espaco pro texto do botao */
+@media (max-width: 420px) { .link-card .code-chip:not(.is-done) .code-chip-label { display: none; } }
+.code-chip-value { font-family: var(--font-title), sans-serif; font-weight: 900; font-style: italic; font-size: .9rem; letter-spacing: .02em; }
+
+/* ---------- Parceiros ---------- */
+.section-title {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+.partner {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.partner:hover { transform: translateY(-3px); border-color: rgba(139, 61, 255, .7); box-shadow: 0 14px 30px -14px rgba(139, 61, 255, .7); }
+.code-chip.partner-code { border-radius: 0; border-width: 1px 0 0; border-style: solid; border-color: var(--border); justify-content: center; padding: .5rem .25rem; gap: .3rem; }
+.partner-code .code-chip-label { display: none; }
+.partner-code .code-chip-value { font-size: .8rem; }
+
+/* ---------- Por que acompanhar ---------- */
+.spine {
+  position: absolute;
+  left: 50%;
+  top: -2.5rem;
+  bottom: -2.5rem;
+  border-left: 1px dashed rgba(139, 61, 255, .35);
+  z-index: -1;
+}
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: .9rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: rgba(13, 12, 26, .95);
+  border: 1px solid rgba(139, 61, 255, .3);
+}
+.feature-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-2);
+  background: rgba(139, 61, 255, .14);
+}
+.feature-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+/* ---------- Chamada final ---------- */
+.cta-title {
+  font-family: var(--font-title), sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+.cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  width: 100%;
+  padding: 1.05rem 1.25rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #9a4dff, #5b21d6);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  box-shadow: 0 16px 40px -14px rgba(139, 61, 255, .9);
+  transition: transform .15s, filter .15s;
+}
+.cta-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* ---------- Painel /admin ----------
+   Dentro de @layer components pra que as classes do Tailwind (w-36, flex-1...) possam sobrescrever. */
+@layer components {
+.btn-primary {
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  transition: filter .15s;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:disabled { opacity: .5; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem .9rem;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-ghost:hover { border-color: var(--muted); }
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: #111113;
+  border: 1px solid var(--border);
+}
+.panel-title { font-weight: 800; font-size: 1.05rem; }
+.hint { font-size: .8rem; color: var(--muted); }
+.lbl { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; color: var(--muted); }
+.row { display: flex; gap: .5rem; align-items: center; }
+
+.field {
+  width: 100%;
+  min-width: 0;
+  padding: .6rem .75rem;
+  border-radius: 10px;
+  background: #0b0b0c;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: .95rem;
+  outline: none;
+}
+.field:focus { border-color: var(--accent); }
+
+.icon-btn { padding: .5rem; color: var(--muted); }
+.icon-btn:hover { color: var(--text); }
+}
+
+/* Barra de rolagem (mesmo esquema do barr4k, nas cores do tema) */
+/* scrollbar-gutter: o espaço da barra fica reservado mesmo com a rolagem travada,
+   então a página não pula pro lado quando a rolagem é liberada */
+html { scrollbar-color: var(--border) var(--bg); scrollbar-gutter: stable; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ---------- Animações ---------- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise .45s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
