@@ -123,6 +123,20 @@ export function validateConfig(raw: unknown): { config: PageConfig; problems: st
   return { config: sanitizeConfig(raw), problems: [] };
 }
 
+// Logos que já foram trocadas por versões novas: o que foi salvo no painel com o caminho antigo passa a usar a nova
+const RETIRED_IMAGES: Record<string, string> = {
+  "/logo-csgoroll.png": "/logo-csgoroll-v3.png",
+  "/logo-csgoroll-w.png": "/logo-csgoroll-v3.png",
+  "/logo-csgobig.png": "/logo-csgobig-v3.png",
+  "/logo-csgobig-w.png": "/logo-csgobig-v3.png",
+  "/logo-fallen.png": "/logo-fallen-v3.png",
+  "/logo-fallen-w.png": "/logo-fallen-v3.png",
+};
+const linkImage = (v: unknown) => {
+  const u = safeUrl(v);
+  return RETIRED_IMAGES[u] ?? (u || undefined);
+};
+
 export function sanitizeConfig(raw: unknown): PageConfig {
   const r = (raw ?? {}) as Record<string, any>;
   const p = (r.profile ?? {}) as Record<string, any>;
@@ -163,7 +177,7 @@ export function sanitizeConfig(raw: unknown): PageConfig {
       const label = str(l?.label, 80);
       const url = smartUrl(l?.url, icon(l?.icon));
       if (!label && !url) return [];
-      return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, image: safeUrl(l?.image) || undefined, code: str(l?.code, 30) || undefined, highlight: !!l?.highlight }];
+      return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, image: linkImage(l?.image), code: str(l?.code, 30) || undefined, highlight: !!l?.highlight }];
     }),
   };
 }

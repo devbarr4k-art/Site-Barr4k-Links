@@ -133,9 +133,9 @@ body { background: var(--bg); color: var(--text); }
 
 /* Logo do parceiro no lugar do ícone: branca e pequena, como os ícones (estilo do site do Vitinho) */
 .link-logo {
-  height: 1.2rem;
-  width: auto;
-  max-width: 5rem;
+  /* mesma largura da caixa dos ícones, pra os textos ficarem alinhados */
+  width: 2.6rem;
+  height: 2.1rem;
   flex-shrink: 0;
   object-fit: contain;
   pointer-events: none;
