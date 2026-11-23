@@ -54,7 +54,7 @@ export const defaultConfig: PageConfig = {
   profile: {
     name: "BARR4K",
     handle: "@barr4k",
-    bio: "Streamer de CS2 na Twitch. Live todo dia, sorteio de skin e os melhores códigos.",
+    bio: "Mercado financeiro, todos os dias. Análises, lives e comunidade.",
     avatar: "/avatar-v2.png",
     verified: true,
     heroVideo: "/hero.mp4",
