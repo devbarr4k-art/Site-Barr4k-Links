@@ -77,7 +77,7 @@ export const defaultConfig: PageConfig = {
     { label: "Sorteios de skins", sub: "Entrada grátis com a Twitch", url: "https://www.barr4k.com/", icon: "gift" },
     { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", image: "/logo-csgoroll-v3.png", code: "BARRAK" },
     { label: "CSGOBig", sub: "3 caixas grátis + 5% de bônus", url: "https://csgobig.com/#!/r/barr4k", icon: "coin", image: "/logo-csgobig-v3.png", code: "BARR4K" },
-    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", image: "/logo-fallen-v3.png", code: "BARR4K" },
+    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", image: "/logo-fallen-v4.png", code: "BARR4K" },
     { label: "YouTube", sub: "Cortes e melhores momentos", url: "https://www.youtube.com/@barr4k", icon: "youtube" },
     { label: "Instagram", sub: "@barr4k", url: "https://www.instagram.com/barr4k", icon: "instagram" },
     { label: "BB Agency", sub: "Minha agência de streamers", url: "https://www.bbagency.net", icon: "site", image: "/logo-bb.png" },

@@ -129,8 +129,9 @@ const RETIRED_IMAGES: Record<string, string> = {
   "/logo-csgoroll-w.png": "/logo-csgoroll-v3.png",
   "/logo-csgobig.png": "/logo-csgobig-v3.png",
   "/logo-csgobig-w.png": "/logo-csgobig-v3.png",
-  "/logo-fallen.png": "/logo-fallen-v3.png",
-  "/logo-fallen-w.png": "/logo-fallen-v3.png",
+  "/logo-fallen.png": "/logo-fallen-v4.png",
+  "/logo-fallen-w.png": "/logo-fallen-v4.png",
+  "/logo-fallen-v3.png": "/logo-fallen-v4.png",
 };
 const linkImage = (v: unknown) => {
   const u = safeUrl(v);

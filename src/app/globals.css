@@ -118,17 +118,16 @@ body { background: var(--bg); color: var(--text); }
 .link-card:hover { border-color: rgba(139, 61, 255, .7); transform: translateY(-2px); box-shadow: 0 12px 30px -14px rgba(139, 61, 255, .7); }
 
 .link-icon {
+  /* ícone branco solto, sem caixa (estilo do site do Vitinho) */
   width: 2.6rem;
   height: 2.6rem;
   flex-shrink: 0;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-2);
-  background: rgba(139, 61, 255, .12);
-  border: 1px solid rgba(139, 61, 255, .25);
+  color: #fff;
   pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(176, 124, 255, .35));
 }
 
 /* Logo do parceiro no lugar do ícone: branca e pequena, como os ícones (estilo do site do Vitinho) */
@@ -148,7 +147,7 @@ body { background: var(--bg); color: var(--text); }
   color: var(--accent-text);
   animation: pulse-purple 2.6s ease-in-out infinite;
 }
-.link-card.is-highlight .link-icon { color: #fff; background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .22); }
+.link-card.is-highlight .link-icon { filter: none; }
 .link-card.is-highlight:hover { filter: brightness(1.08); }
 
 @keyframes pulse-purple {

@@ -68,7 +68,7 @@ export default async function Home() {
                     <img src={l.image} alt="" className="link-logo" />
                   ) : Icon && (
                     <span className="link-icon">
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-6 h-6" />
                     </span>
                   )}
                   <span className="flex-1 min-w-0 text-left pointer-events-none">
