@@ -16,6 +16,7 @@ export type LinkItem = {
   sub?: string;       // linha pequena embaixo do texto (opcional)
   code?: string;       // código/cupom com botão de copiar (opcional)
   highlight?: boolean; // true = botão de destaque (roxo)
+  color?: string;      // cor do destaque (#rrggbb); vazio = roxo
 };
 
 export type Social = { icon: IconName; url: string; label: string };
@@ -48,9 +49,26 @@ export type PageConfig = {
   links: LinkItem[];
   partners: Partner[];
   highlights: Highlight[];
+  v?: number; // versão do formato: conteúdo salvo antes de um botão novo recebe ele na frente
 };
 
+// Cores prontas do menuzinho do painel (a primeira, vazia, é o roxo padrão)
+export const HIGHLIGHT_COLORS = [
+  { name: "Roxo", value: "" },
+  { name: "Vermelho", value: "#ff3333" },
+  { name: "Laranja", value: "#ff6a00" },
+  { name: "Amarelo", value: "#ffc400" },
+  { name: "Verde", value: "#22c55e" },
+  { name: "Azul", value: "#3b82f6" },
+  { name: "Rosa", value: "#ec4899" },
+];
+
+// Botão de cadastro (pedido em 2026-11-23): o primeiro da lista
+export const CADASTRO_LINK: LinkItem = { label: "Realizar cadastro", sub: "Comece pelo primeiro passo", url: "https://r.ryvon.io/l/1297/1316", image: "/logo-cadastro.png", highlight: true, color: "#ff3333" };
+export const CONFIG_V = 2;
+
 export const defaultConfig: PageConfig = {
+  v: CONFIG_V,
   profile: {
     name: "BARR4K",
     handle: "@barr4k",
@@ -73,6 +91,7 @@ export const defaultConfig: PageConfig = {
     { icon: "steam", url: "https://steamcommunity.com/id/barr4k/", label: "Steam" },
   ],
   links: [
+    CADASTRO_LINK,
     { label: "Assistir a live", sub: "twitch.tv/barr4k", url: "https://www.twitch.tv/barr4k", icon: "twitch", highlight: true },
     { label: "Sorteios de skins", sub: "Entrada grátis com a Twitch", url: "https://www.barr4k.com/", icon: "gift" },
     { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", image: "/logo-csgoroll-v3.png", code: "BARRAK" },

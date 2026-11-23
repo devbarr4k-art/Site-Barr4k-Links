@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiUpload, FiExternalLink, FiLogOut, FiCheck } from "react-icons/fi";
-import { ICON_NAMES, type Highlight, type IconName, type LinkItem, type PageConfig, type Partner, type Social } from "@/links";
+import { HIGHLIGHT_COLORS, ICON_NAMES, type Highlight, type IconName, type LinkItem, type PageConfig, type Partner, type Social } from "@/links";
 import { ICON_LABELS } from "@/lib/icons";
 
 type Kind = "image" | "video";
@@ -193,8 +193,36 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
               </div>
               <label className="flex items-center gap-2 text-sm text-gray-300 select-none">
                 <input type="checkbox" className="accent-[var(--accent)] w-4 h-4" checked={!!l.highlight} onChange={(e) => editLink(i, { highlight: e.target.checked })} />
-                Destaque (botão roxo pulsando)
+                Destaque (botão pulsando)
               </label>
+              {l.highlight && (
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-300">
+                  <span>Cor:</span>
+                  {HIGHLIGHT_COLORS.map((c) => {
+                    const on = (l.color ?? "") === c.value;
+                    return (
+                      <button
+                        key={c.name}
+                        type="button"
+                        title={c.name}
+                        aria-label={c.name}
+                        aria-pressed={on}
+                        onClick={() => editLink(i, { color: c.value || undefined })}
+                        className={`w-7 h-7 rounded-full border-2 transition ${on ? "border-white scale-110" : "border-white/20 hover:border-white/60"}`}
+                        style={{ background: c.value || "linear-gradient(135deg, #9a4dff, #5b21d6)" }}
+                      />
+                    );
+                  })}
+                  {/* qualquer outra cor */}
+                  <label
+                    title="Outra cor"
+                    className={`relative w-7 h-7 rounded-full border-2 cursor-pointer overflow-hidden ${l.color && !HIGHLIGHT_COLORS.some((c) => c.value === l.color) ? "border-white scale-110" : "border-white/20 hover:border-white/60"}`}
+                    style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }}
+                  >
+                    <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={l.color || "#8b3dff"} onChange={(e) => editLink(i, { color: e.target.value })} />
+                  </label>
+                </div>
+              )}
             </div>
           ))}
           <button className="btn-ghost self-start" onClick={() => setLinks([...cfg.links, { label: "", url: "" }])}><FiPlus /> Adicionar botão</button>

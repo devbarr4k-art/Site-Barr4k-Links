@@ -150,6 +150,19 @@ body { background: var(--bg); color: var(--text); }
 .link-card.is-highlight .link-icon { filter: none; }
 .link-card.is-highlight:hover { filter: brightness(1.08); }
 
+/* destaque com a cor escolhida no painel (--hl) */
+.link-card.is-highlight.has-color {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--hl) 85%, #fff), color-mix(in srgb, var(--hl) 82%, #000));
+  border-color: color-mix(in srgb, var(--hl) 55%, #fff);
+  animation-name: pulse-custom;
+}
+.link-card.has-color .link-logo { filter: none; }
+
+@keyframes pulse-custom {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hl) 55%, transparent), 0 14px 34px -16px color-mix(in srgb, var(--hl) 90%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--hl) 0%, transparent), 0 14px 34px -16px color-mix(in srgb, var(--hl) 90%, transparent); }
+}
+
 @keyframes pulse-purple {
   0%, 100% { box-shadow: 0 0 0 0 rgba(139, 61, 255, .55), 0 14px 34px -16px rgba(139, 61, 255, .9); }
   50% { box-shadow: 0 0 0 7px rgba(139, 61, 255, 0), 0 14px 34px -16px rgba(139, 61, 255, .9); }

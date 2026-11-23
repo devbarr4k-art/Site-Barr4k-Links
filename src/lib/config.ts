@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
-import { defaultConfig, ICON_NAMES, type IconName, type PageConfig } from "@/links";
+import { CADASTRO_LINK, CONFIG_V, defaultConfig, ICON_NAMES, type IconName, type PageConfig } from "@/links";
 
 // Sem banco: o conteúdo inteiro é um JSON no Vercel Blob (site/config.json).
 // Precisa do Blob store ligado ao projeto na Vercel (cria a variável BLOB_READ_WRITE_TOKEN sozinho).
@@ -138,13 +138,25 @@ const linkImage = (v: unknown) => {
   return RETIRED_IMAGES[u] ?? (u || undefined);
 };
 
+const hexColor = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v.trim()) ? v.trim().toLowerCase() : undefined);
+
 export function sanitizeConfig(raw: unknown): PageConfig {
   const r = (raw ?? {}) as Record<string, any>;
   const p = (r.profile ?? {}) as Record<string, any>;
   const d = defaultConfig.profile;
   // Campo nunca salvo = usa o padrão; string vazia salva = vazio de propósito
   const opt = (v: unknown, def: string, max = 200) => (v === undefined ? def : str(v, max));
+  const links: PageConfig["links"] = (Array.isArray(r.links) ? r.links : []).slice(0, 30).flatMap((l: any) => {
+    const label = str(l?.label, 80);
+    const url = smartUrl(l?.url, icon(l?.icon));
+    if (!label && !url) return [];
+    return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, image: linkImage(l?.image), code: str(l?.code, 30) || undefined, highlight: !!l?.highlight, color: hexColor(l?.color) ?? (l?.tone === "red" ? "#ff3333" : undefined) }];
+  });
+  // Salvo antes do botão de cadastro existir: ele entra em 1º. Depois do próximo salvar, vale o que estiver no painel.
+  const savedV = typeof r.v === "number" ? r.v : 1;
+  if (savedV < 2 && !links.some((l) => l.url === CADASTRO_LINK.url)) links.unshift(CADASTRO_LINK);
   return {
+    v: CONFIG_V,
     profile: {
       name: str(p.name, 60) || d.name,
       handle: str(p.handle, 40),
@@ -174,11 +186,6 @@ export function sanitizeConfig(raw: unknown): PageConfig {
       const url = smartUrl(s?.url, i);
       return i ? [{ icon: i, url, label: str(s?.label, 40) || i }] : [];
     }),
-    links: (Array.isArray(r.links) ? r.links : []).slice(0, 30).flatMap((l: any) => {
-      const label = str(l?.label, 80);
-      const url = smartUrl(l?.url, icon(l?.icon));
-      if (!label && !url) return [];
-      return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, image: linkImage(l?.image), code: str(l?.code, 30) || undefined, highlight: !!l?.highlight }];
-    }),
+    links,
   };
 }

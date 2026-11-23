@@ -10,6 +10,12 @@ const external =(url: string) => (url.startsWith("http") ? { target: "_blank", r
 // Sem link salvo: mostra o item, mas sem levar a lugar nenhum
 const linkProps = (url: string) => (url ? { href: url, ...external(url) } : { role: "presentation" as const, "aria-disabled": true });
 
+// Cor clara (amarelo, verde-limão...) pede texto escuro
+const isLight = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255 > 0.68;
+};
+
 export default async function Home() {
   const { profile, socials, links, partners, highlights } = await getConfig();
   const hasCover = !!(profile.heroVideo || profile.heroPoster);
@@ -60,7 +66,10 @@ export default async function Home() {
             const Icon = l.icon ? ICONS[l.icon] : null;
             return (
               <li key={i} className="animate-rise" style={{ animationDelay: `${120 + i * 50}ms` }}>
-                <div className={`link-card group ${l.highlight ? "is-highlight" : ""}`}>
+                <div
+                  className={`link-card group ${l.highlight ? "is-highlight" : ""} ${l.highlight && l.color ? "has-color" : ""}`}
+                  style={l.highlight && l.color ? ({ "--hl": l.color, color: isLight(l.color) ? "#141018" : "#fff" } as React.CSSProperties) : undefined}
+                >
                   {/* o link cobre o cartão todo; o botão de copiar fica por cima dele */}
                   <a {...linkProps(l.url)} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={l.label} />
                   {l.image ? (
