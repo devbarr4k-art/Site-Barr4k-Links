@@ -4,6 +4,7 @@ import { getConfig } from "@/lib/config";
 import { ICONS } from "@/lib/icons";
 import HeroVideo from "./HeroVideo";
 import CopyCode from "./CopyCode";
+import SmoothScroll from "./SmoothScroll";
 
 const TwitchIcon = ICONS.twitch;
 const external =(url: string) => (url.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {});
@@ -22,6 +23,7 @@ export default async function Home() {
 
   return (
     <main className="relative min-h-svh overflow-x-clip">
+      <SmoothScroll />
       <div className="page-bg" />
 
       {/* Capa: a arte do Barr4k com o carro, em loop, se desfazendo no fundo */}
