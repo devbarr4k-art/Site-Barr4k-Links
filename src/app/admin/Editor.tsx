@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiUpload, FiExternalLink, FiLogOut, FiCheck } from "react-icons/fi";
+import { BASE } from "@/lib/base";
 import { HIGHLIGHT_COLORS, ICON_NAMES, type Highlight, type IconName, type LinkItem, type PageConfig, type Partner, type Social } from "@/links";
 import { ICON_LABELS } from "@/lib/icons";
 
@@ -11,7 +12,7 @@ type Kind = "image" | "video";
 // Manda o arquivo direto do navegador pro Vercel Blob (a rota só dá a permissão)
 async function uploadFile(file: File): Promise<string> {
   const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+/, "") || "arquivo";
-  const blob = await upload(`uploads/${safe}`, file, { access: "public", handleUploadUrl: "/api/admin/upload" });
+  const blob = await upload(`uploads/${safe}`, file, { access: "public", handleUploadUrl: `${BASE}/api/admin/upload` });
   return blob.url;
 }
 
@@ -55,7 +56,7 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
 
   const save = async () => {
     setStatus({ type: "busy", msg: "Salvando..." });
-    const res = await fetch("/api/admin/save", {
+    const res = await fetch(`${BASE}/api/admin/save`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cfg),
@@ -68,7 +69,7 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
   };
 
   const logout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch(`${BASE}/api/admin/logout`, { method: "POST" });
     window.location.reload();
   };
 
@@ -92,7 +93,7 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-extrabold">Painel</h1>
           <div className="flex gap-2">
-            <a href="/" target="_blank" className="btn-ghost"><FiExternalLink /> Ver página</a>
+            <a href={BASE} target="_blank" className="btn-ghost"><FiExternalLink /> Ver página</a>
             <button onClick={logout} className="btn-ghost" aria-label="Sair"><FiLogOut /></button>
           </div>
         </header>

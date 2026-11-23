@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
+import { stripBase, withBase } from "@/lib/base";
 import { CADASTRO_LINK, CONFIG_V, defaultConfig, ICON_NAMES, type IconName, type PageConfig } from "@/links";
 
 // Sem banco: o conteúdo inteiro é um JSON no Vercel Blob (site/config.json).
@@ -44,16 +45,27 @@ export const getConfig = unstable_cache(
   async (): Promise<PageConfig> => {
     try {
       const raw = await readRaw();
-      return raw ? sanitizeConfig(raw) : defaultConfig;
+      return withBaseConfig(raw ? sanitizeConfig(raw) : defaultConfig);
     } catch (e) {
       console.error("[config] leitura falhou", e);
-      return defaultConfig;
+      return withBaseConfig(defaultConfig);
     }
   },
   // Chave inclui o deploy: a cada deploy novo o padrão do código é relido (o salvar do admin usa a tag)
   [CONFIG_TAG, process.env.VERCEL_DEPLOYMENT_ID ?? "local"],
   { tags: [CONFIG_TAG] },
 );
+
+// Arquivos da pasta public ganham o /trader na frente pra aparecer (o salvo fica sem)
+function withBaseConfig(c: PageConfig): PageConfig {
+  const p = c.profile;
+  return {
+    ...c,
+    profile: { ...p, avatar: withBase(p.avatar), heroVideo: withBase(p.heroVideo), heroVideoMobile: withBase(p.heroVideoMobile), heroPoster: withBase(p.heroPoster) },
+    links: c.links.map((l) => (l.image ? { ...l, image: withBase(l.image) } : l)),
+    partners: c.partners.map((x) => ({ ...x, image: withBase(x.image) })),
+  };
+}
 
 export async function saveConfig(config: PageConfig) {
   const json = JSON.stringify(config);
@@ -135,8 +147,9 @@ const RETIRED_IMAGES: Record<string, string> = {
 };
 // Avatares antigos (desenho) trocados pela foto: o que foi salvo com eles passa a mostrar a foto
 const RETIRED_AVATARS: Record<string, string> = { "/avatar.png": "/avatar-v3.jpg", "/avatar-v2.png": "/avatar-v3.jpg" };
+const file = (v: unknown) => stripBase(safeUrl(v));
 const linkImage = (v: unknown) => {
-  const u = safeUrl(v);
+  const u = file(v);
   return RETIRED_IMAGES[u] ?? (u || undefined);
 };
 
@@ -163,18 +176,18 @@ export function sanitizeConfig(raw: unknown): PageConfig {
       name: str(p.name, 60) || d.name,
       handle: str(p.handle, 40),
       bio: str(p.bio, 200),
-      avatar: RETIRED_AVATARS[safeUrl(p.avatar)] ?? (safeUrl(p.avatar) || d.avatar),
+      avatar: RETIRED_AVATARS[file(p.avatar)] ?? (file(p.avatar) || d.avatar),
       verified: p.verified === undefined ? d.verified : !!p.verified,
-      heroVideo: safeUrl(p.heroVideo),
-      heroVideoMobile: safeUrl(p.heroVideoMobile),
-      heroPoster: safeUrl(p.heroPoster),
+      heroVideo: file(p.heroVideo),
+      heroVideoMobile: file(p.heroVideoMobile),
+      heroPoster: file(p.heroPoster),
       ctaTitle: opt(p.ctaTitle, d.ctaTitle, 80),
       ctaLabel: opt(p.ctaLabel, d.ctaLabel, 40),
       ctaUrl: p.ctaUrl === undefined ? d.ctaUrl : smartUrl(p.ctaUrl),
       footerNote: opt(p.footerNote, d.footerNote, 240),
     },
     partners: (Array.isArray(r.partners) ? r.partners : defaultConfig.partners).slice(0, 12).flatMap((x: any) => {
-      const image = safeUrl(x?.image);
+      const image = file(x?.image);
       if (!image) return [];
       return [{ name: str(x?.name, 40), image, url: smartUrl(x?.url), code: str(x?.code, 30) || undefined }];
     }),
