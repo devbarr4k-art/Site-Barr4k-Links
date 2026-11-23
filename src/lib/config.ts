@@ -163,7 +163,7 @@ export function sanitizeConfig(raw: unknown): PageConfig {
       const label = str(l?.label, 80);
       const url = smartUrl(l?.url, icon(l?.icon));
       if (!label && !url) return [];
-      return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, code: str(l?.code, 30) || undefined, highlight: !!l?.highlight }];
+      return [{ label: label || url, url, icon: icon(l?.icon), sub: str(l?.sub, 80) || undefined, image: safeUrl(l?.image) || undefined, code: str(l?.code, 30) || undefined, highlight: !!l?.highlight }];
     }),
   };
 }

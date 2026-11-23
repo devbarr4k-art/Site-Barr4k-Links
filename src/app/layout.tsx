@@ -13,9 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
   return {
     metadataBase: host ? new URL(`https://${host}`) : undefined,
-    title: `${profile.name} — Links`,
+    // Nome da aba fixo em minúsculo, como ele escreve a marca
+    title: "barr4k",
     description: profile.bio || `Links do ${profile.name}`,
-    openGraph: { title: `${profile.name} — Links`, description: profile.bio, images: profile.heroPoster ? [profile.heroPoster] : undefined },
+    openGraph: { title: "barr4k", description: profile.bio, images: profile.heroPoster ? [profile.heroPoster] : undefined },
   };
 }
 

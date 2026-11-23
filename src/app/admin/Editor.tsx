@@ -179,6 +179,14 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
                 <RowActions onUp={() => setLinks(move(cfg.links, i, -1))} onDown={() => setLinks(move(cfg.links, i, 1))} onDelete={() => setLinks(cfg.links.filter((_, k) => k !== i))} />
               </div>
               <input className="field" placeholder="Link (https://...)" value={l.url} onChange={(e) => editLink(i, { url: e.target.value })} />
+              <div className="flex items-center gap-2">
+                {l.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={l.image} alt="" className="h-9 w-16 object-contain rounded-md bg-[#0d0c16] border border-white/10 p-1 shrink-0" />
+                )}
+                <input className="field text-sm" placeholder="Logo no lugar do ícone (opcional)" value={l.image ?? ""} onChange={(e) => editLink(i, { image: e.target.value })} />
+                <UploadBtn id={`link-${i}`} kind="image" label="Logo" onUrl={(u) => editLink(i, { image: u })} />
+              </div>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input className="field text-sm" placeholder="Texto pequeno embaixo (opcional)" value={l.sub ?? ""} onChange={(e) => editLink(i, { sub: e.target.value })} />
                 <input className="field text-sm sm:w-44 uppercase" placeholder="Código/cupom (opcional)" value={l.code ?? ""} onChange={(e) => editLink(i, { code: e.target.value })} />

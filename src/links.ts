@@ -12,7 +12,8 @@ export type LinkItem = {
   label: string;       // texto do botão
   url: string;         // para onde vai
   icon?: IconName;     // ícone à esquerda (opcional)
-  sub?: string;        // linha pequena embaixo do texto (opcional)
+  image?: string;      // logo à esquerda no lugar do ícone (opcional, deitada ~4:1 ou quadrada)
+  sub?: string;       // linha pequena embaixo do texto (opcional)
   code?: string;       // código/cupom com botão de copiar (opcional)
   highlight?: boolean; // true = botão de destaque (roxo)
 };
@@ -73,19 +74,16 @@ export const defaultConfig: PageConfig = {
   ],
   links: [
     { label: "Assistir a live", sub: "twitch.tv/barr4k", url: "https://www.twitch.tv/barr4k", icon: "twitch", highlight: true },
-    { label: "Sorteios de skins", sub: "Entrada grátis com a Twitch", url: "", icon: "gift" },
-    { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", code: "BARRAK" },
-    { label: "CSGOBig", sub: "3 caixas grátis + 5% de bônus", url: "https://csgobig.com/#!/r/barr4k", icon: "coin", code: "BARR4K" },
-    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", code: "BARR4K" },
+    { label: "Sorteios de skins", sub: "Entrada grátis com a Twitch", url: "https://www.barr4k.com/", icon: "gift" },
+    { label: "CSGORoll", sub: "10% de bônus + 3 caixas grátis", url: "https://www.csgoroll.com/r/BARRAK", icon: "coin", image: "/logo-csgoroll.png", code: "BARRAK" },
+    { label: "CSGOBig", sub: "3 caixas grátis + 5% de bônus", url: "https://csgobig.com/#!/r/barr4k", icon: "coin", image: "/logo-csgobig.png", code: "BARR4K" },
+    { label: "Fallen Store", sub: "Periféricos com desconto", url: "https://www.fallenstore.com.br/", icon: "shop", image: "/logo-fallen.png", code: "BARR4K" },
     { label: "YouTube", sub: "Cortes e melhores momentos", url: "https://www.youtube.com/@barr4k", icon: "youtube" },
     { label: "Instagram", sub: "@barr4k", url: "https://www.instagram.com/barr4k", icon: "instagram" },
-    { label: "BB Agency", sub: "Minha agência de streamers", url: "https://www.bbagency.net", icon: "site" },
+    { label: "BB Agency", sub: "Minha agência de streamers", url: "https://www.bbagency.net", icon: "site", image: "/logo-bb.png" },
   ],
-  partners: [
-    { name: "CSGORoll", image: "/p-csgoroll.png", url: "https://www.csgoroll.com/r/BARRAK", code: "BARRAK" },
-    { name: "CSGOBig", image: "/p-csgobig.png", url: "https://csgobig.com/#!/r/barr4k", code: "BARR4K" },
-    { name: "Fallen Store", image: "/p-fallen.png", url: "https://www.fallenstore.com.br/", code: "BARR4K" },
-  ],
+  // Seção de artes dos parceiros: desligada (pedido do Barr4k). Dá pra adicionar pelo painel.
+  partners: [],
   highlights: [
     { icon: "live", title: "Live todo dia", text: "CS2, abertura de caixas e muita resenha na Twitch." },
     { icon: "trophy", title: "Sorteios de skins", text: "Skin de verdade pra quem acompanha. Entrada grátis." },

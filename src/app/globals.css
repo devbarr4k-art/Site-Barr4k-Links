@@ -131,6 +131,23 @@ body { background: var(--bg); color: var(--text); }
   pointer-events: none;
 }
 
+/* Logo do parceiro no lugar do ícone: caixa deitada escura, logo inteira dentro */
+.link-logo {
+  width: 4.75rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .3rem .4rem;
+  background: #0d0c16;
+  border: 1px solid rgba(139, 61, 255, .25);
+  overflow: hidden;
+  pointer-events: none;
+}
+.link-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
 .link-card.is-highlight {
   background: linear-gradient(135deg, #9a4dff, #5b21d6);
   border-color: #b27dff;
@@ -190,43 +207,101 @@ body { background: var(--bg); color: var(--text); }
 .partner-code .code-chip-label { display: none; }
 .partner-code .code-chip-value { font-size: .8rem; }
 
-/* ---------- Por que acompanhar ---------- */
-.spine {
+/* ---------- Por que colar na live ---------- */
+.feat {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 1.1rem 1rem 1.15rem;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(139, 61, 255, .24), transparent 60%),
+    linear-gradient(180deg, #16132b, #0c0a17);
+  border: 1px solid rgba(139, 61, 255, .32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 18px 40px -24px rgba(139, 61, 255, .8);
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.feat:hover { transform: translateY(-3px); border-color: rgba(176, 124, 255, .7); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 22px 44px -20px rgba(139, 61, 255, .9); }
+/* brilho que passa no hover */
+.feat::after {
+  content: "";
   position: absolute;
-  left: 50%;
-  top: -2.5rem;
-  bottom: -2.5rem;
-  border-left: 1px dashed rgba(139, 61, 255, .35);
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .07) 50%, transparent 65%);
+  transform: translateX(-100%);
+  transition: transform .7s ease;
+}
+.feat:hover::after { transform: translateX(100%); }
+
+/* cartão principal: a arte do carro ao fundo, apagando pra esquerda */
+.feat-main {
+  min-height: 9.5rem;
+  padding-right: 40%;
+  background:
+    linear-gradient(90deg, #0d0b19 30%, rgba(13, 11, 25, .35) 65%, rgba(13, 11, 25, 0)),
+    var(--feat-art, none) 72% 62% / cover no-repeat,
+    #0d0b19;
+}
+
+.feat-num {
+  position: absolute;
+  right: .7rem;
+  top: .1rem;
+  font-family: var(--font-title), sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 3.1rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(176, 124, 255, .4);
   z-index: -1;
 }
-.feature {
-  display: flex;
-  align-items: flex-start;
-  gap: .9rem;
-  padding: 1rem;
-  border-radius: var(--radius);
-  background: rgba(13, 12, 26, .95);
-  border: 1px solid rgba(139, 61, 255, .3);
-}
-.feature-icon {
-  width: 2.25rem;
-  height: 2.25rem;
-  flex-shrink: 0;
-  border-radius: 10px;
+
+.feat-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-2);
-  background: rgba(139, 61, 255, .14);
+  color: #fff;
+  background: linear-gradient(135deg, #9a4dff, #4c1fc0);
+  box-shadow: 0 0 22px rgba(139, 61, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
 }
-.feature-title {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .22em;
+.feat-title {
+  margin-top: .85rem;
+  font-family: var(--font-title), sans-serif;
+  font-weight: 900;
+  font-style: italic;
   text-transform: uppercase;
-  color: var(--accent-2);
+  font-size: 1.08rem;
+  line-height: 1.05;
 }
+.feat-main .feat-title { font-size: 1.35rem; }
+.feat-text { margin-top: .35rem; font-size: .84rem; line-height: 1.4; color: var(--muted); }
+.feat-main .feat-text { color: #d6d1ea; }
+
+.live-pill {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .28rem .6rem;
+  border-radius: 9999px;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(239, 68, 68, .18);
+  border: 1px solid rgba(239, 68, 68, .55);
+  backdrop-filter: blur(4px);
+}
+.live-dot { width: .45rem; height: .45rem; border-radius: 9999px; background: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, .7); animation: live 1.6s ease-out infinite; }
+@keyframes live { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, .7); } 100% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
 
 /* ---------- Chamada final ---------- */
 .cta-title {

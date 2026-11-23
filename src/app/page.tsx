@@ -63,7 +63,12 @@ export default async function Home() {
                 <div className={`link-card group ${l.highlight ? "is-highlight" : ""}`}>
                   {/* o link cobre o cartão todo; o botão de copiar fica por cima dele */}
                   <a {...linkProps(l.url)} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={l.label} />
-                  {Icon && (
+                  {l.image ? (
+                    <span className="link-logo">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={l.image} alt="" />
+                    </span>
+                  ) : Icon && (
                     <span className="link-icon">
                       <Icon className="w-5 h-5" />
                     </span>
@@ -103,24 +108,33 @@ export default async function Home() {
 
         {/* Por que acompanhar */}
         {highlights.length > 0 && (
-          <section className="relative mt-12 w-full flex flex-col gap-3">
-            <div className="spine" aria-hidden />
-            {highlights.map((h, i) => {
-              const Icon = h.icon ? ICONS[h.icon] : null;
-              return (
-                <div key={i} className="feature">
-                  {Icon && (
-                    <span className="feature-icon">
-                      <Icon className="w-[18px] h-[18px]" />
-                    </span>
-                  )}
-                  <div className="min-w-0">
-                    {h.title && <p className="feature-title">{h.title}</p>}
-                    {h.text && <p className="mt-1 text-[14px] leading-snug text-[var(--text)]/85">{h.text}</p>}
+          <section className="mt-14 w-full">
+            <h2 className="section-title">Por que colar na live</h2>
+            {/* 1º cartão largo com a arte ao fundo e selo "ao vivo"; os outros lado a lado */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {highlights.map((h, i) => {
+                const Icon = h.icon ? ICONS[h.icon] : null;
+                const main = i === 0;
+                // último sozinho na linha também ocupa as duas colunas
+                const wide = main || (i === highlights.length - 1 && (highlights.length - 1) % 2 === 1);
+                return (
+                  <div
+                    key={i}
+                    className={`feat animate-rise ${main ? "feat-main" : ""} ${wide ? "col-span-2" : ""}`}
+                    style={{ animationDelay: `${i * 80}ms`, ...(main && profile.heroPoster ? { ["--feat-art" as string]: `url("${profile.heroPoster}")` } : {}) }}
+                  >
+                    {main ? <span className="live-pill"><span className="live-dot" />Ao vivo</span> : <span className="feat-num" aria-hidden>0{i + 1}</span>}
+                    {Icon && (
+                      <span className="feat-icon">
+                        <Icon className="w-5 h-5" />
+                      </span>
+                    )}
+                    {h.title && <p className="feat-title">{h.title}</p>}
+                    {h.text && <p className="feat-text">{h.text}</p>}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </section>
         )}
 
