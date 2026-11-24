@@ -151,27 +151,36 @@ export default function ReportView({ report }: { report: Report }) {
     <div translate="no" className="notranslate min-h-[100dvh] bg-[var(--bg)] font-sans text-[var(--text)]" style={THEMES[report.theme]}>
       {/* topo: marca à esquerda, usuário à direita */}
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[var(--col)]">
-        <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-6 px-4 sm:px-6">
-          <span className="shrink-0 truncate font-[family-name:var(--font-title)] text-xl font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
-          {/* menu: ícone fino + texto, item atual em branco e negrito (no celular rola de lado) */}
-          <nav aria-label="Menu" className="no-scrollbar -mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-[13px]">
+        <div className="mx-auto flex h-11 max-w-[1320px] items-center gap-5 px-4 sm:px-6">
+          {/* logo enviada no admin; sem logo, o nome do painel em texto */}
+          {report.panelLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={withBase(report.panelLogo)} alt={report.panelName} className="h-7 w-auto max-w-[160px] shrink-0 object-contain object-left" />
+          ) : (
+            <span className="shrink-0 truncate font-[family-name:var(--font-title)] text-lg font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
+          )}
+          {/* menu compacto: ícone fino + texto, item atual em branco e negrito (no celular rola de lado) */}
+          <nav aria-label="Menu" className="no-scrollbar flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto text-[12px]">
             {NAV.map(({ label, Icon }) => {
               const on = label === "Central de Dados";
               return (
                 <span
                   key={label}
                   aria-current={on ? "page" : undefined}
-                  className={`flex shrink-0 cursor-default items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 transition-colors ${on ? "font-bold text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
+                  className={`flex shrink-0 cursor-default items-center gap-1 whitespace-nowrap rounded-md px-1.5 py-1 transition-colors ${on ? "font-bold text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
                 >
-                  <Icon className="h-3.5 w-3.5" strokeWidth={on ? 2.4 : 1.8} />
+                  <Icon className="h-3 w-3" strokeWidth={on ? 2.4 : 1.8} />
                   {label}
                 </span>
               );
             })}
           </nav>
           <div className="flex shrink-0 items-center" title={report.userName || undefined}>
-            <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent)] text-[11px] font-black text-[var(--on-accent)]">
-              {initials}
+            {/* com foto: sem fundo colorido, só um aro fino; sem foto: iniciais na cor do tema */}
+            <span
+              className={`relative grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-black ${report.userPhoto ? "ring-1 ring-white/25" : "bg-[var(--accent)] text-[var(--on-accent)]"}`}
+            >
+              {!report.userPhoto && initials}
               {report.userPhoto && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={withBase(report.userPhoto)} alt="" className="absolute inset-0 h-full w-full object-cover" />
