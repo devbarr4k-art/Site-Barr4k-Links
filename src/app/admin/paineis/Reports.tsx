@@ -288,7 +288,7 @@ function ReportEditor({
           <div className="grid gap-3 sm:grid-cols-2">
             {/* logo do topo do painel (sem logo, aparece o nome em texto) */}
             <div className="flex flex-col gap-1.5">
-              <span className="hint">Logo do topo (PNG sem fundo fica melhor)</span>
+              <span className="hint">Logo do topo (SVG ou PNG sem fundo)</span>
               <div className="flex items-center gap-2">
                 <span className="grid h-[46px] min-w-0 flex-1 place-items-center overflow-hidden rounded-[10px] border border-[var(--border)] bg-black/30 px-3">
                   {r.panelLogo ? (
@@ -303,7 +303,7 @@ function ReportEditor({
                   <input
                     type="file"
                     hidden
-                    accept="image/png,image/webp,image/jpeg"
+                    accept="image/svg+xml,image/png,image/webp,image/jpeg"
                     disabled={!!uploading || !canUpload}
                     onChange={async (e) => {
                       const f = e.target.files?.[0];

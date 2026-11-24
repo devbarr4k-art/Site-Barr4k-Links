@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         if (!(await isLoggedIn())) throw new Error("Faça login de novo.");
         if (!pathname.startsWith("uploads/")) throw new Error("Caminho inválido.");
         return {
-          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "video/mp4", "video/webm"],
+          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/svg+xml", "video/mp4", "video/webm"],
           maximumSizeInBytes: 100 * 1024 * 1024,
           addRandomSuffix: true,
         };
