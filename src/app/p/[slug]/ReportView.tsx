@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiChevronLeft, FiChevronRight, FiInfo, FiMoreHorizontal } from "react-icons/fi";
+import { FiBarChart2, FiBriefcase, FiChevronLeft, FiChevronRight, FiHome, FiInfo, FiLink, FiMoreHorizontal, FiUser, FiUsers } from "react-icons/fi";
 import { withBase } from "@/lib/base";
 import { convRate, type Report, type ReportRow } from "@/lib/report-types";
 import CountText from "./CountText";
@@ -13,6 +13,16 @@ const THEMES: Record<Report["theme"], React.CSSProperties> = {
   azul: { "--bg": "#0a0f1c", "--col": "#0f1626", "--panel": "#131b2e", "--card": "#182237", "--line": "#243250", "--text": "#f1f4fb", "--muted": "#8a98b8", "--accent": "#4f7bff", "--chart": "#7fa4ff", "--on-accent": "#ffffff" } as React.CSSProperties,
   claro: { "--bg": "#eceef2", "--col": "#f5f6f8", "--panel": "#ffffff", "--card": "#f7f8fa", "--line": "#e1e4ea", "--text": "#16181d", "--muted": "#6b7280", "--accent": "#6d4cf0", "--chart": "#4f7bff", "--on-accent": "#ffffff" } as React.CSSProperties,
 };
+
+const NAV = [
+  { label: "Painel", Icon: FiHome },
+  { label: "Central de Dados", Icon: FiBarChart2 },
+  { label: "Meus jogadores", Icon: FiUser },
+  { label: "Meus afiliados", Icon: FiUsers },
+  { label: "Minha campanha", Icon: FiLink },
+  { label: "Pagamentos", Icon: FiBriefcase },
+  { label: "Mais", Icon: FiMoreHorizontal },
+];
 
 const PER_PAGE = 10;
 const toDate = (s: string) => {
@@ -141,10 +151,25 @@ export default function ReportView({ report }: { report: Report }) {
     <div translate="no" className="notranslate min-h-[100dvh] bg-[var(--bg)] font-sans text-[var(--text)]" style={THEMES[report.theme]}>
       {/* topo: marca à esquerda, usuário à direita */}
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[var(--col)]">
-        <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-4 px-4 sm:px-6">
-          <span className="truncate font-[family-name:var(--font-title)] text-2xl font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
-          <div className="ml-auto flex min-w-0 items-center gap-3">
-            {report.userName && <span className="hidden truncate text-sm font-semibold text-[var(--muted)] sm:block">{report.userName}</span>}
+        <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-6 px-4 sm:px-6">
+          <span className="shrink-0 truncate font-[family-name:var(--font-title)] text-xl font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
+          {/* menu: ícone fino + texto, item atual em branco e negrito (no celular rola de lado) */}
+          <nav aria-label="Menu" className="no-scrollbar -mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-[13px]">
+            {NAV.map(({ label, Icon }) => {
+              const on = label === "Central de Dados";
+              return (
+                <span
+                  key={label}
+                  aria-current={on ? "page" : undefined}
+                  className={`flex shrink-0 cursor-default items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 transition-colors ${on ? "font-bold text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
+                >
+                  <Icon className="h-3.5 w-3.5" strokeWidth={on ? 2.4 : 1.8} />
+                  {label}
+                </span>
+              );
+            })}
+          </nav>
+          <div className="flex shrink-0 items-center" title={report.userName || undefined}>
             <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent)] text-[11px] font-black text-[var(--on-accent)]">
               {initials}
               {report.userPhoto && (
