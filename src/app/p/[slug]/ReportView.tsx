@@ -101,19 +101,38 @@ export default function ReportView({ report }: { report: Report }) {
   const cur = Math.min(page, pages - 1);
   const pageLines = lines.slice(cur * PER_PAGE, (cur + 1) * PER_PAGE);
 
-  // gráfico fino do topo: depósitos por dia
-  const pts = useMemo(() => {
-    if (rows.length < 2) return [];
-    const max = Math.max(...rows.map((r) => r.deposits), 1);
-    return rows.map((r, i) => [(i / (rows.length - 1)) * 1000, 100 - (r.deposits / max) * 92] as [number, number]);
+  // gráfico fino do topo: depósitos por dia numa janela de pelo menos 30 dias até o último dia;
+  // dia que não está na tabela conta como zero, então cada depósito vira uma "onda" saindo da base
+  const series = useMemo(() => {
+    if (!rows.length) return [] as { date: string; deposits: number }[];
+    const byDay = new Map(rows.map((r) => [r.date, r.deposits]));
+    const last = toDate(rows[rows.length - 1].date);
+    const first = toDate(rows[0].date);
+    const start = new Date(last);
+    start.setDate(last.getDate() - 29);
+    const from = first < start ? first : start;
+    // +1 dia vazio no fim: a onda do último dia desce de volta em vez de ficar cortada na borda
+    const end = new Date(last);
+    end.setDate(last.getDate() + 1);
+    const out: { date: string; deposits: number }[] = [];
+    for (const d = new Date(from); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      out.push({ date: key, deposits: byDay.get(key) ?? 0 });
+    }
+    return out;
   }, [rows]);
+  const pts = useMemo(() => {
+    if (series.length < 2) return [];
+    const max = Math.max(...series.map((r) => r.deposits), 1);
+    return series.map((r, i) => [(i / (series.length - 1)) * 1000, 100 - (r.deposits / max) * 92] as [number, number]);
+  }, [series]);
   const line = smoothPath(pts);
 
   function onChartMove(e: React.PointerEvent) {
     const el = chartRef.current;
     if (!el || pts.length < 2) return;
     const r = el.getBoundingClientRect();
-    setHover(Math.max(0, Math.min(rows.length - 1, Math.round(((e.clientX - r.left) / r.width) * (rows.length - 1)))));
+    setHover(Math.max(0, Math.min(series.length - 1, Math.round(((e.clientX - r.left) / r.width) * (series.length - 1)))));
   }
 
   const initials = report.userName.replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase() || "B4";
@@ -174,7 +193,7 @@ export default function ReportView({ report }: { report: Report }) {
                   className="pointer-events-none absolute top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-[var(--line)] bg-[var(--card)] px-2 py-1 text-[11px] shadow-lg"
                   style={{ left: `clamp(56px, ${(pts[hover][0] / 1000) * 100}%, calc(100% - 56px))` }}
                 >
-                  <span className="text-[var(--muted)]">{longDate(rows[hover].date)}</span> · <b className="tabular-nums">{money(rows[hover].deposits)}</b>
+                  <span className="text-[var(--muted)]">{longDate(series[hover].date)}</span> · <b className="tabular-nums">{money(series[hover].deposits)}</b>
                 </span>
               )}
             </>
@@ -184,8 +203,8 @@ export default function ReportView({ report }: { report: Report }) {
           <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chart)]/80" />
         </div>
         <div className="flex justify-between px-4 pt-2 text-xs text-[var(--muted)] sm:px-8">
-          <span>{rows.length ? longDate(rows[0].date) : ""}</span>
-          <span>{rows.length ? longDate(rows[rows.length - 1].date) : ""}</span>
+          <span>{series.length ? longDate(series[0].date) : ""}</span>
+          <span>{series.length ? longDate(series[series.length - 1].date) : ""}</span>
         </div>
 
         <div className="px-3 sm:px-4">
@@ -205,7 +224,7 @@ export default function ReportView({ report }: { report: Report }) {
                   <div className="mt-3 border-t border-dashed border-[var(--line)] pt-3 text-xl font-bold tabular-nums">
                     <CountText value={m.value} />
                   </div>
-                  <div className={`mt-1 h-4 text-xs font-semibold ${m.delta.trim().startsWith("-") ? "text-red-400" : "text-emerald-400"}`}>{m.delta}</div>
+                  <div className={`mt-1 h-4 text-xs font-semibold ${m.delta.trim().startsWith("-") ? "text-red-400" : "text-emerald-400"}`}>{m.delta && !/^[+-]/.test(m.delta) ? `+${m.delta}` : m.delta}</div>
                 </div>
               ))}
             </div>

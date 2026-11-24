@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { blobReady } from "@/lib/config";
-import { CURRENCIES, DEFAULT_METRICS, REPORT_THEMES, SLUG_RE, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
+import { compose, composeDelta, CURRENCIES, DEFAULT_METRICS, inferKind, METRIC_KINDS, rawOf, REPORT_THEMES, SLUG_RE, type MetricKind, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
 
 // Cada painel = reports/<link>.json no Vercel Blob (mesmo esquema do site/config.json).
 // No PC sem o token, fica numa pasta temporária só pra testar.
@@ -19,12 +19,15 @@ export function cleanReport(raw: unknown): Report | null {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const slug = str(r.slug, 40).toLowerCase();
   if (!SLUG_RE.test(slug)) return null;
-  const metrics: ReportMetric[] = Array.isArray(r.metrics)
-    ? r.metrics.slice(0, 16).map((m) => {
-        const o = (m ?? {}) as Record<string, unknown>;
-        return { label: str(o.label, 40), value: str(o.value, 24), delta: str(o.delta, 12) };
-      })
-    : DEFAULT_METRICS;
+  const currency = CURRENCIES.includes(r.currency as Report["currency"]) ? (r.currency as Report["currency"]) : "$";
+  // o valor sempre sai com o símbolo do tipo (%, x, moeda), mesmo que tenha sido salvo sem
+  const metrics: ReportMetric[] = (Array.isArray(r.metrics) ? r.metrics.slice(0, 16) : DEFAULT_METRICS).map((m) => {
+    const o = (m ?? {}) as Record<string, unknown>;
+    const label = str(o.label, 40);
+    const value = str(o.value, 24);
+    const kind: MetricKind = METRIC_KINDS.some((k) => k.key === o.kind) ? (o.kind as MetricKind) : inferKind(label, value);
+    return { label, value: compose(kind, rawOf(value) || "0", currency), delta: composeDelta(str(o.delta, 12)), kind };
+  });
   const rows: ReportRow[] = Array.isArray(r.rows)
     ? r.rows
         .map((x) => {
@@ -42,7 +45,7 @@ export function cleanReport(raw: unknown): Report | null {
     userName: str(r.userName, 40),
     userPhoto: okPhoto(photo) ? photo : "",
     theme: REPORT_THEMES.some((t) => t.key === r.theme) ? (r.theme as Report["theme"]) : "roxo",
-    currency: CURRENCIES.includes(r.currency as Report["currency"]) ? (r.currency as Report["currency"]) : "$",
+    currency,
     metrics,
     rows,
     updatedAt: str(r.updatedAt, 40) || new Date().toISOString(),

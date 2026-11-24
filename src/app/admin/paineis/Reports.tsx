@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiChevronLeft, FiChevronRight, FiEdit2, FiExternalLink, FiPlus, FiTrash2, FiUpload, FiZap } from "react-icons/fi";
 import { BASE, withBase } from "@/lib/base";
-import { convRate, CURRENCIES, emptyReport, REPORT_THEMES, SLUG_RE, toSlug, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
+import { compose, composeDelta, convRate, CURRENCIES, emptyReport, METRIC_KINDS, rawOf, REPORT_THEMES, SLUG_RE, toSlug, type MetricKind, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
 
 const PER_PAGE = 10;
 const api = `${BASE}/api/admin/reports`;
@@ -350,7 +350,15 @@ function ReportEditor({
           </div>
           <label className="flex items-center gap-3">
             <span className="hint">Moeda da tabela</span>
-            <select className="field !w-auto" value={r.currency} onChange={(e) => set({ currency: e.target.value as Report["currency"] })}>
+            <select
+              className="field !w-auto"
+              value={r.currency}
+              onChange={(e) => {
+                const currency = e.target.value as Report["currency"];
+                // os cards de dinheiro trocam o símbolo junto
+                set({ currency, metrics: r.metrics.map((m) => (m.kind === "money" ? { ...m, value: compose("money", rawOf(m.value), currency) } : m)) });
+              }}
+            >
               {CURRENCIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -368,14 +376,43 @@ function ReportEditor({
               <FiZap /> Preencher com a soma dos dias
             </button>
           </div>
-          <p className="hint">O valor é texto livre (ex.: $517.34, 3.27x, 0.0%) e sobe do zero ao abrir o link. A variação é opcional (ex.: -33% fica vermelho, +12% verde).</p>
+          <p className="hint">Escolha o tipo de cada card: o símbolo ($, %, x) fica fixo e você digita só o número. O valor sobe do zero ao abrir o link. A variação é opcional: -33 fica vermelho, 12 fica verde.</p>
           <ul className="flex flex-col gap-2">
             {r.metrics.map((m, i) => (
-              <li key={i} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_5rem_auto] items-center gap-2">
-                <input className="field" value={m.label} placeholder="Nome do card" maxLength={40} onChange={(e) => setMetric(i, { label: e.target.value })} />
-                <input className="field font-bold" value={m.value} placeholder="Valor" maxLength={24} onChange={(e) => setMetric(i, { value: e.target.value })} />
-                <input className="field" value={m.delta} placeholder="+0%" maxLength={12} onChange={(e) => setMetric(i, { delta: e.target.value })} />
-                <div className="flex">
+              <li key={i} className="grid grid-cols-2 items-center gap-2 border-b border-[var(--border)] pb-2 last:border-0 sm:grid-cols-[minmax(0,1.3fr)_8.5rem_minmax(0,1fr)_6rem_auto] sm:border-0 sm:pb-0">
+                <input className="field col-span-2 sm:col-span-1" value={m.label} placeholder="Nome do card" maxLength={40} onChange={(e) => setMetric(i, { label: e.target.value })} />
+                <select className="field" value={m.kind} title="Tipo do valor" onChange={(e) => setMetric(i, { kind: e.target.value as MetricKind, value: compose(e.target.value as MetricKind, rawOf(m.value), r.currency) })}>
+                  {METRIC_KINDS.map((k) => (
+                    <option key={k.key} value={k.key}>
+                      {k.label}
+                    </option>
+                  ))}
+                </select>
+                {/* número com o símbolo fixo do lado (não dá pra apagar) */}
+                <label className="field flex !p-0 items-center overflow-hidden focus-within:!border-[var(--accent)]">
+                  {m.kind === "money" && <span className="pl-3 font-bold text-[var(--muted)]">{r.currency}</span>}
+                  <input
+                    className="w-full min-w-0 bg-transparent px-2.5 py-[.6rem] font-bold outline-none"
+                    inputMode="decimal"
+                    value={rawOf(m.value)}
+                    placeholder="0"
+                    maxLength={18}
+                    onChange={(e) => setMetric(i, { value: compose(m.kind, e.target.value, r.currency) })}
+                  />
+                  {(m.kind === "pct" || m.kind === "mult") && <span className="pr-3 font-bold text-[var(--muted)]">{m.kind === "pct" ? "%" : "x"}</span>}
+                </label>
+                <label className="field flex !p-0 items-center overflow-hidden focus-within:!border-[var(--accent)]" title="Variação (opcional)">
+                  <input
+                    className="w-full min-w-0 bg-transparent px-2.5 py-[.6rem] outline-none"
+                    inputMode="decimal"
+                    value={m.delta.replace(/%$/, "")}
+                    placeholder="±0"
+                    maxLength={8}
+                    onChange={(e) => setMetric(i, { delta: composeDelta(e.target.value) })}
+                  />
+                  <span className="pr-3 font-bold text-[var(--muted)]">%</span>
+                </label>
+                <div className="flex justify-end">
                   <button type="button" onClick={() => moveMetric(i, -1)} disabled={i === 0} className="p-1.5 text-[var(--muted)] hover:text-[var(--text)] disabled:opacity-20" aria-label="Subir">
                     <FiArrowUp />
                   </button>
@@ -390,7 +427,7 @@ function ReportEditor({
             ))}
           </ul>
           {r.metrics.length < 16 && (
-            <button type="button" onClick={() => set({ metrics: [...r.metrics, { label: "", value: "0", delta: "" }] })} className="btn-ghost self-start">
+            <button type="button" onClick={() => set({ metrics: [...r.metrics, { label: "", value: "0", delta: "", kind: "num" }] })} className="btn-ghost self-start">
               <FiPlus /> Adicionar card
             </button>
           )}
