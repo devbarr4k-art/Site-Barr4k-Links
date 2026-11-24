@@ -192,7 +192,7 @@ function ReportEditor({
   const [saved, setSaved] = useState(oldSlug); // link já salvo (vira o "oldSlug" do próximo salvar)
   const [slugTouched, setSlugTouched] = useState(!!oldSlug);
   const [status, setStatus] = useState<{ type: "ok" | "err" | "busy"; msg: string } | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<"" | "photo" | "logo">("");
   const [rowPage, setRowPage] = useState(() => Math.max(0, Math.ceil(initial.rows.length / PER_PAGE) - 1));
 
   const set = (patch: Partial<Report>) => setR((c) => ({ ...c, ...patch }));
@@ -286,10 +286,46 @@ function ReportEditor({
             {slugTaken && <span className="text-xs text-red-300">Esse link já é de outro painel.</span>}
           </label>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5">
-              <span className="hint">Nome do painel (aparece no topo)</span>
-              <input className="field" value={r.panelName} maxLength={40} onChange={(e) => set({ panelName: e.target.value })} />
-            </label>
+            {/* logo do topo do painel (sem logo, aparece o nome em texto) */}
+            <div className="flex flex-col gap-1.5">
+              <span className="hint">Logo do topo (PNG sem fundo fica melhor)</span>
+              <div className="flex items-center gap-2">
+                <span className="grid h-[46px] min-w-0 flex-1 place-items-center overflow-hidden rounded-[10px] border border-[var(--border)] bg-black/30 px-3">
+                  {r.panelLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={withBase(r.panelLogo)} alt="" className="max-h-8 max-w-full object-contain" />
+                  ) : (
+                    <span className="truncate text-xs text-[var(--muted)]">Sem logo: mostra &ldquo;{r.panelName}&rdquo;</span>
+                  )}
+                </span>
+                <label className={`btn-ghost shrink-0 ${canUpload ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`} title={canUpload ? "" : "Envio só funciona com o Vercel Blob ligado"}>
+                  <FiUpload /> {uploading === "logo" ? "Enviando..." : "Logo"}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/png,image/webp,image/jpeg"
+                    disabled={!!uploading || !canUpload}
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!f) return;
+                      setUploading("logo");
+                      try {
+                        set({ panelLogo: await uploadFile(f) });
+                      } catch (er) {
+                        setStatus({ type: "err", msg: (er as Error).message || "Falha no envio." });
+                      }
+                      setUploading("");
+                    }}
+                  />
+                </label>
+                {r.panelLogo && (
+                  <button type="button" onClick={() => set({ panelLogo: "" })} className="btn-ghost shrink-0 text-red-300" aria-label="Remover logo">
+                    <FiTrash2 />
+                  </button>
+                )}
+              </div>
+            </div>
             <label className="flex flex-col gap-1.5">
               <span className="hint">Nome do usuário</span>
               <input
@@ -310,23 +346,23 @@ function ReportEditor({
             </span>
             <input className="field" placeholder="Foto do usuário (link) ou envie" value={r.userPhoto} onChange={(e) => set({ userPhoto: e.target.value.trim() })} />
             <label className={`btn-ghost shrink-0 ${canUpload ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`} title={canUpload ? "" : "Envio só funciona com o Vercel Blob ligado"}>
-              <FiUpload /> {uploading ? "Enviando..." : "Foto"}
+              <FiUpload /> {uploading === "photo" ? "Enviando..." : "Foto"}
               <input
                 type="file"
                 hidden
                 accept="image/*"
-                disabled={uploading || !canUpload}
+                disabled={!!uploading || !canUpload}
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
                   e.target.value = "";
                   if (!f) return;
-                  setUploading(true);
+                  setUploading("photo");
                   try {
                     set({ userPhoto: await uploadFile(f) });
                   } catch (er) {
                     setStatus({ type: "err", msg: (er as Error).message || "Falha no envio." });
                   }
-                  setUploading(false);
+                  setUploading("");
                 }}
               />
             </label>

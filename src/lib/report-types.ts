@@ -50,6 +50,8 @@ export type ReportRow = { date: string; clicks: number; signups: number; ftd: nu
 export type Report = {
   slug: string;
   panelName: string;
+  /** logo do topo (no lugar do nome do painel); vazio = mostra o nome em texto */
+  panelLogo: string;
   userName: string;
   userPhoto: string;
   theme: ReportTheme;
@@ -87,6 +89,7 @@ export function emptyReport(slug = ""): Report {
   return {
     slug,
     panelName: "Barr4k",
+    panelLogo: "",
     userName: "",
     userPhoto: "",
     theme: "grafite",

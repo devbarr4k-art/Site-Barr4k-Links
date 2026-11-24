@@ -42,6 +42,7 @@ export function cleanReport(raw: unknown): Report | null {
   return {
     slug,
     panelName: str(r.panelName, 40) || "Barr4k",
+    panelLogo: okPhoto(str(r.panelLogo, 400)) ? str(r.panelLogo, 400) : "",
     userName: str(r.userName, 40),
     userPhoto: okPhoto(photo) ? photo : "",
     theme: REPORT_THEMES.some((t) => t.key === r.theme) ? (r.theme as Report["theme"]) : "roxo",
