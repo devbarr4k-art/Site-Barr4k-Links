@@ -1,8 +1,8 @@
 // Painéis de resultado: editados em /trader/admin/paineis, abertos em /trader/p/<link>
 
 export const REPORT_THEMES = [
-  { key: "roxo", label: "Roxo Barr4k" },
   { key: "grafite", label: "Grafite" },
+  { key: "roxo", label: "Roxo Barr4k" },
   { key: "azul", label: "Azul" },
   { key: "claro", label: "Claro" },
 ] as const;
@@ -59,7 +59,7 @@ export function emptyReport(slug = ""): Report {
     panelName: "Barr4k",
     userName: "",
     userPhoto: "",
-    theme: "roxo",
+    theme: "grafite",
     currency: "$",
     metrics: DEFAULT_METRICS.map((m) => ({ ...m })),
     rows: [],
