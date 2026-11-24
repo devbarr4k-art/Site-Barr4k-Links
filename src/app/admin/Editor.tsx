@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiUpload, FiExternalLink, FiLogOut, FiCheck } from "react-icons/fi";
+import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiUpload, FiExternalLink, FiLogOut, FiCheck, FiBarChart2 } from "react-icons/fi";
 import { BASE } from "@/lib/base";
 import { HIGHLIGHT_COLORS, ICON_NAMES, type Highlight, type IconName, type LinkItem, type PageConfig, type Partner, type Social } from "@/links";
 import { ICON_LABELS } from "@/lib/icons";
@@ -93,6 +93,8 @@ export default function Editor({ initial, canSave, canUpload }: { initial: PageC
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-extrabold">Painel</h1>
           <div className="flex gap-2">
+            {/* painéis de resultado (cada um com o próprio link /trader/p/...) */}
+            <a href={`${BASE}/admin/paineis`} className="btn-ghost"><FiBarChart2 /> Painéis</a>
             <a href={BASE} target="_blank" className="btn-ghost"><FiExternalLink /> Ver página</a>
             <button onClick={logout} className="btn-ghost" aria-label="Sair"><FiLogOut /></button>
           </div>
