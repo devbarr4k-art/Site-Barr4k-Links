@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiBarChart2, FiBriefcase, FiChevronLeft, FiChevronRight, FiHome, FiInfo, FiLink, FiMoreHorizontal, FiUser, FiUsers } from "react-icons/fi";
+import { FiBarChart2, FiBriefcase, FiChevronLeft, FiChevronRight, FiChevronUp, FiDatabase, FiFilter, FiHome, FiInfo, FiLink, FiMoreHorizontal, FiUser, FiUsers } from "react-icons/fi";
 import { withBase } from "@/lib/base";
 import { convRate, type Report, type ReportRow } from "@/lib/report-types";
 import CountText from "./CountText";
@@ -29,6 +29,7 @@ const toDate = (s: string) => {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
+const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const longDate = (s: string) => toDate(s).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
 
 type Group = "day" | "week" | "month";
@@ -45,7 +46,7 @@ function group(rows: ReportRow[], g: Group): Line[] {
     if (g === "week") {
       const mon = new Date(d);
       mon.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-      key = mon.toISOString().slice(0, 10);
+      key = isoDay(mon);
       label = `Semana de ${mon.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}`;
     } else {
       key = r.date.slice(0, 7);
@@ -57,8 +58,8 @@ function group(rows: ReportRow[], g: Group): Line[] {
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, { label, rows: rs }]) => {
-      const sum = (k: keyof Omit<ReportRow, "date">) => rs.reduce((t, r) => t + r[k], 0);
-      return { date: key, label, clicks: sum("clicks"), signups: sum("signups"), ftd: sum("ftd"), deposits: sum("deposits"), flagged: sum("flagged") / rs.length };
+      const sum = (k: keyof Omit<ReportRow, "date">) => rs.reduce((t, r) => t + (r[k] ?? 0), 0);
+      return { date: key, label, clicks: sum("clicks"), signups: sum("signups"), ftd: sum("ftd"), deposits: sum("deposits"), ngr: sum("ngr"), flagged: sum("flagged") / rs.length };
     });
 }
 
@@ -87,12 +88,32 @@ const Dots = () => (
   </span>
 );
 
+/** "Não há dados disponíveis" com o ícone de banco de dados, numa caixa tracejada */
+const Empty = ({ className = "" }: { className?: string }) => (
+  <div className={`grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-[var(--muted)] ${className}`}>
+    <div className="flex flex-col items-center gap-3">
+      <FiDatabase className="h-11 w-11" strokeWidth={1.6} />
+      <span className="text-[15px]">Não há dados disponíveis</span>
+    </div>
+  </div>
+);
+
+type SeriesKey = "clicks" | "ftd" | "ngr";
+const SERIES: { key: SeriesKey; label: string }[] = [
+  { key: "clicks", label: "Cliques" },
+  { key: "ftd", label: "FTDs" },
+  { key: "ngr", label: "NGR" },
+];
+
 export default function ReportView({ report }: { report: Report }) {
   const { rows, currency } = report;
   const [g, setG] = useState<Group>("day");
   const [page, setPage] = useState(0);
   const [drawn, setDrawn] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
+  const [metric, setMetric] = useState<SeriesKey>("clicks");
+  const [openPlayers, setOpenPlayers] = useState(true);
+  const [q, setQ] = useState("");
   const chartRef = useRef<HTMLDivElement>(null);
 
   // o gráfico "desenha" ao abrir (junto com os números subindo)
@@ -111,36 +132,37 @@ export default function ReportView({ report }: { report: Report }) {
   const cur = Math.min(page, pages - 1);
   const pageLines = lines.slice(cur * PER_PAGE, (cur + 1) * PER_PAGE);
 
-  // gráfico fino do topo: depósitos por dia numa janela de pelo menos 30 dias até o último dia;
-  // dia que não está na tabela conta como zero, então cada depósito vira uma "onda" saindo da base
+  // "Tendência de desempenho": janela de 30 dias até o último dia da tabela (ou hoje); dia sem linha = 0
   const series = useMemo(() => {
-    if (!rows.length) return [] as { date: string; deposits: number }[];
-    const byDay = new Map(rows.map((r) => [r.date, r.deposits]));
-    const last = toDate(rows[rows.length - 1].date);
-    const first = toDate(rows[0].date);
+    const byDay = new Map(rows.map((r) => [r.date, r]));
+    const last = rows.length ? toDate(rows[rows.length - 1].date) : new Date();
+    const first = rows.length ? toDate(rows[0].date) : last;
     const start = new Date(last);
-    start.setDate(last.getDate() - 29);
+    start.setDate(last.getDate() - 30);
     const from = first < start ? first : start;
-    // +1 dia vazio no fim: a onda do último dia desce de volta em vez de ficar cortada na borda
-    const end = new Date(last);
-    end.setDate(last.getDate() + 1);
-    const out: { date: string; deposits: number }[] = [];
-    for (const d = new Date(from); d <= end; d.setDate(d.getDate() + 1)) {
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      out.push({ date: key, deposits: byDay.get(key) ?? 0 });
+    const out: { date: string; value: number }[] = [];
+    for (const d = new Date(from); d <= last; d.setDate(d.getDate() + 1)) {
+      const key = isoDay(d);
+      out.push({ date: key, value: byDay.get(key)?.[metric] ?? 0 });
     }
     return out;
-  }, [rows]);
+  }, [rows, metric]);
+  const hasData = series.some((r) => r.value !== 0);
   const pts = useMemo(() => {
     if (series.length < 2) return [];
-    const max = Math.max(...series.map((r) => r.deposits), 1);
-    return series.map((r, i) => [(i / (series.length - 1)) * 1000, 100 - (r.deposits / max) * 92] as [number, number]);
+    const max = Math.max(...series.map((r) => r.value), 1);
+    return series.map((r, i) => [(i / (series.length - 1)) * 1000, 100 - (Math.max(0, r.value) / max) * 88] as [number, number]);
   }, [series]);
   const line = smoothPath(pts);
+  const fmtVal = (v: number) => (metric === "ngr" ? money(v) : Math.round(v).toLocaleString("pt-BR"));
+  const enRange = series.length
+    ? `${toDate(series[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${toDate(series[series.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+    : "";
+  const seriesLabel = SERIES.find((x) => x.key === metric)!.label;
 
   function onChartMove(e: React.PointerEvent) {
     const el = chartRef.current;
-    if (!el || pts.length < 2) return;
+    if (!el || !hasData || pts.length < 2) return;
     const r = el.getBoundingClientRect();
     setHover(Math.max(0, Math.min(series.length - 1, Math.round(((e.clientX - r.left) / r.width) * (series.length - 1)))));
   }
@@ -148,19 +170,17 @@ export default function ReportView({ report }: { report: Report }) {
   const initials = report.userName.replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase() || "B4";
 
   return (
-    <div translate="no" className="notranslate min-h-[100dvh] bg-[var(--bg)] font-sans text-[var(--text)]" style={THEMES[report.theme]}>
-      {/* topo: marca à esquerda, usuário à direita */}
+    <div translate="no" className="notranslate min-h-[100dvh] bg-[var(--bg)] pb-10 font-sans text-[var(--text)]" style={THEMES[report.theme]}>
+      {/* topo: marca à esquerda, menu, usuário à direita */}
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[var(--col)]">
-        <div className="mx-auto flex h-[46px] max-w-[1320px] items-center gap-6 px-4 sm:px-6">
-          {/* logo enviada no admin; sem logo, o nome do painel em texto */}
+        <div className="mx-auto flex h-[58px] max-w-[1320px] items-center gap-8 px-4 sm:px-6">
           {report.panelLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={withBase(report.panelLogo)} alt={report.panelName} className="h-7 w-auto max-w-[160px] shrink-0 object-contain object-left" />
+            <img src={withBase(report.panelLogo)} alt={report.panelName} className="h-8 w-auto max-w-[180px] shrink-0 object-contain object-left" />
           ) : (
-            <span className="shrink-0 truncate font-[family-name:var(--font-title)] text-[26px] font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
+            <span className="shrink-0 truncate font-[family-name:var(--font-title)] text-[28px] font-black uppercase italic leading-none tracking-tight">{report.panelName}</span>
           )}
-          {/* menu: ícone fino + texto, item atual em branco e negrito (no celular rola de lado) */}
-          <nav aria-label="Menu" className="no-scrollbar flex min-w-0 flex-1 items-center gap-4 overflow-x-auto text-[15px] sm:text-[16px]">
+          <nav aria-label="Menu" className="no-scrollbar flex min-w-0 flex-1 items-center gap-6 overflow-x-auto text-[15px] sm:text-[16px]">
             {NAV.map(({ label, Icon }) => {
               const on = label === "Central de Dados";
               return (
@@ -176,7 +196,6 @@ export default function ReportView({ report }: { report: Report }) {
             })}
           </nav>
           <div className="flex shrink-0 items-center" title={report.userName || undefined}>
-            {/* com foto: sem fundo colorido, só um aro fino; sem foto: iniciais na cor do tema */}
             <span
               className={`relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full text-[11px] font-black ${report.userPhoto ? "ring-1 ring-white/25" : "bg-[var(--accent)] text-[var(--on-accent)]"}`}
             >
@@ -190,19 +209,47 @@ export default function ReportView({ report }: { report: Report }) {
         </div>
       </header>
 
-      {/* coluna central um tom mais clara, como um painel de afiliado */}
-      <main className="mx-auto min-h-[calc(100dvh-3.5rem)] max-w-[1320px] border-x border-[var(--line)] bg-[var(--col)] pb-16">
-        {/* gráfico fino de ponta a ponta */}
-        <div
-          ref={chartRef}
-          className="relative h-24 touch-none sm:h-28"
-          onPointerMove={onChartMove}
-          onPointerDown={onChartMove}
-          onPointerLeave={() => setHover(null)}
-        >
-          {pts.length >= 2 ? (
-            <>
-              <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
+      {/* coluna central: bloco arredondado um tom mais claro */}
+      <main className="mx-auto mt-6 max-w-[1320px] rounded-2xl border border-[var(--line)] bg-[var(--col)] pb-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+        {/* Tendência de desempenho */}
+        <section className="pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--muted)]">
+              Tendência de desempenho <FiInfo className="h-3.5 w-3.5" />
+            </h2>
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs text-[var(--muted)]">{enRange}</span>
+              <span className="flex items-center gap-1.5 rounded-lg bg-[var(--card)] px-2.5 py-1.5 text-sm font-semibold">
+                <FiFilter className="h-4 w-4" /> Filtros
+              </span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 px-4 sm:px-8">
+            <FiBarChart2 className="mr-1 h-4 w-4 text-[var(--muted)]" />
+            {SERIES.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => (setMetric(key), setHover(null))}
+                className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${metric === key ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_22%,transparent)] text-[var(--text)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--text)]"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 px-4 text-xs text-[var(--muted)] sm:px-8">
+            <span className="h-2 w-2 rounded-[2px] bg-[var(--chart)]" /> {seriesLabel}
+          </div>
+
+          <div
+            ref={chartRef}
+            className="relative mt-2 h-[150px] touch-none"
+            onPointerMove={onChartMove}
+            onPointerDown={onChartMove}
+            onPointerLeave={() => setHover(null)}
+          >
+            {hasData && pts.length >= 2 && (
+              <svg key={metric} viewBox="0 0 1000 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
                 <defs>
                   <linearGradient id="rep-area" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--chart)" stopOpacity="0.22" />
@@ -222,50 +269,49 @@ export default function ReportView({ report }: { report: Report }) {
                   style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)" }}
                 />
               </svg>
-              {hover !== null && (
-                <span
-                  className="pointer-events-none absolute top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-[var(--line)] bg-[var(--card)] px-2 py-1 text-[11px] shadow-lg"
-                  style={{ left: `clamp(56px, ${(pts[hover][0] / 1000) * 100}%, calc(100% - 56px))` }}
-                >
-                  <span className="text-[var(--muted)]">{longDate(series[hover].date)}</span> · <b className="tabular-nums">{money(series[hover].deposits)}</b>
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="absolute inset-x-0 bottom-0 border-b-2 border-[var(--chart)]/60" />
-          )}
-          <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chart)]/80" />
-        </div>
-        <div className="flex justify-between px-4 pt-2 text-xs text-[var(--muted)] sm:px-8">
-          <span>{series.length ? longDate(series[0].date) : ""}</span>
-          <span>{series.length ? longDate(series[series.length - 1].date) : ""}</span>
-        </div>
+            )}
+            {hover !== null && pts[hover] && (
+              <span
+                className="pointer-events-none absolute top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-[var(--line)] bg-[var(--card)] px-2 py-1 text-[11px] shadow-lg"
+                style={{ left: `clamp(56px, ${(pts[hover][0] / 1000) * 100}%, calc(100% - 56px))` }}
+              >
+                <span className="text-[var(--muted)]">{longDate(series[hover].date)}</span> · <b className="tabular-nums">{fmtVal(series[hover].value)}</b>
+              </span>
+            )}
+            {/* linha de base de ponta a ponta */}
+            <span className="absolute inset-x-0 bottom-0 h-px bg-[var(--chart)]" />
+          </div>
+          <div className="flex justify-between px-4 pt-1.5 text-xs text-[var(--muted)] sm:px-8">
+            <span>{series.length ? longDate(series[0].date) : ""}</span>
+            <span>{series.length ? longDate(series[series.length - 1].date) : ""}</span>
+          </div>
+        </section>
 
         <div className="px-3 sm:px-4">
           {/* resumo */}
-          <section className="mt-5 rounded-2xl bg-[var(--panel)] p-3 sm:p-4">
+          <section className="mt-3 rounded-2xl bg-[var(--panel)] p-3 shadow-[0_4px_24px_rgba(0,0,0,0.25)]">
             <div className="flex items-center justify-between px-1 pb-4 pt-1">
               <h2 className="text-lg font-semibold text-[var(--muted)]">Resumo do desempenho</h2>
               <Dots />
             </div>
-            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
               {report.metrics.map((m, i) => (
-                <div key={i} className="rounded-xl border border-[var(--line)] bg-[var(--card)] p-3 sm:p-3.5">
+                <div key={i} className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 pb-3 pt-3.5">
                   <div className="flex items-start justify-between gap-2 text-xs text-[var(--muted)]">
                     <span>{m.label}</span>
                     {/sinaliz/i.test(m.label) && <FiInfo className="mt-0.5 h-3 w-3 shrink-0" />}
                   </div>
-                  <div className="mt-3 border-t border-dashed border-[var(--line)] pt-3 text-xl font-bold tabular-nums">
+                  <div className="mt-4 border-t border-dashed border-[var(--line)] pt-3 text-xl font-bold tabular-nums">
                     <CountText value={m.value} />
                   </div>
-                  <div className={`mt-1 h-4 text-xs font-semibold ${m.delta.trim().startsWith("-") ? "text-red-400" : "text-emerald-400"}`}>{m.delta && !/^[+-]/.test(m.delta) ? `+${m.delta}` : m.delta}</div>
+                  <div className={`mt-1 min-h-4 text-xs font-semibold ${m.delta.trim().startsWith("-") ? "text-red-400" : "text-emerald-400"}`}>{m.delta && !/^[+-]/.test(m.delta) ? `+${m.delta}` : m.delta}</div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* tabela */}
-          <section className="mt-6 rounded-2xl bg-[var(--panel)] p-3 sm:p-4">
+          {/* análise (tabela) */}
+          <section className="mt-4 rounded-2xl bg-[var(--panel)] p-3 sm:p-4">
             <div className="flex items-center justify-between px-1 pt-1">
               <h2 className="text-lg font-semibold text-[var(--muted)]">Análise de desempenho</h2>
               <Dots />
@@ -289,41 +335,38 @@ export default function ReportView({ report }: { report: Report }) {
               </div>
             </div>
 
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[760px] text-[13px] tabular-nums">
-                <thead>
-                  <tr className="text-left text-xs font-semibold">
-                    {["Data", "Cliques", "Inscrições", "Taxa de conversão", "FTD #", "Quantidade de depósitos", "Sinalizado"].map((h, i) => (
-                      <th key={h} className={`px-3 py-3 font-semibold ${i ? "text-right" : ""}`}>
-                        <span className="inline-flex items-center gap-2">
-                          {h} <FiInfo className="h-3 w-3 text-[var(--muted)]" />
-                        </span>
-                      </th>
+            {!lines.length ? (
+              <Empty className="mt-4 h-[200px]" />
+            ) : (
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[760px] text-[13px] tabular-nums">
+                  <thead>
+                    <tr className="text-left text-xs font-semibold">
+                      {["Data", "Cliques", "Inscrições", "Taxa de conversão", "FTD #", "Quantidade de depósitos", "Sinalizado"].map((h, i) => (
+                        <th key={h} className={`px-3 py-3 font-semibold ${i ? "text-right" : ""}`}>
+                          <span className="inline-flex items-center gap-2">
+                            {h} <FiInfo className="h-3 w-3 text-[var(--muted)]" />
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageLines.map((r, i) => (
+                      <tr key={r.date} className={i % 2 ? "" : "bg-[var(--card)]"}>
+                        <td className="px-3 py-2.5 font-medium first-letter:uppercase">{r.label}</td>
+                        <td className="px-3 py-2.5 text-right">{Math.round(r.clicks).toLocaleString("pt-BR")}</td>
+                        <td className="px-3 py-2.5 text-right">{Math.round(r.signups).toLocaleString("pt-BR")}</td>
+                        <td className="px-3 py-2.5 text-right">{convRate(r).toFixed(2)}%</td>
+                        <td className="px-3 py-2.5 text-right">{Math.round(r.ftd).toLocaleString("pt-BR")}</td>
+                        <td className="px-3 py-2.5 text-right">{money(r.deposits)}</td>
+                        <td className="px-3 py-2.5 text-right">{r.flagged.toFixed(2)}%</td>
+                      </tr>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageLines.map((r, i) => (
-                    <tr key={r.date} className={i % 2 ? "" : "bg-[var(--card)]"}>
-                      <td className="px-3 py-2.5 font-medium first-letter:uppercase">{r.label}</td>
-                      <td className="px-3 py-2.5 text-right">{Math.round(r.clicks).toLocaleString("pt-BR")}</td>
-                      <td className="px-3 py-2.5 text-right">{Math.round(r.signups).toLocaleString("pt-BR")}</td>
-                      <td className="px-3 py-2.5 text-right">{convRate(r).toFixed(2)}%</td>
-                      <td className="px-3 py-2.5 text-right">{Math.round(r.ftd).toLocaleString("pt-BR")}</td>
-                      <td className="px-3 py-2.5 text-right">{money(r.deposits)}</td>
-                      <td className="px-3 py-2.5 text-right">{r.flagged.toFixed(2)}%</td>
-                    </tr>
-                  ))}
-                  {!lines.length && (
-                    <tr>
-                      <td colSpan={7} className="px-3 py-12 text-center text-[var(--muted)]">
-                        Sem dados no período.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {pages > 1 && (
               <nav className="mt-3 flex flex-wrap items-center justify-center gap-1 text-[13px]" aria-label="Páginas">
@@ -344,6 +387,28 @@ export default function ReportView({ report }: { report: Report }) {
                   <FiChevronRight />
                 </button>
               </nav>
+            )}
+          </section>
+
+          {/* Cliques detalhados do jogador (recolhível) */}
+          <section className="mt-4 rounded-2xl bg-[var(--panel)]">
+            <button type="button" onClick={() => setOpenPlayers((v) => !v)} className="flex w-full items-center justify-between px-4 py-4 text-left" aria-expanded={openPlayers}>
+              <h2 className="text-lg font-semibold text-[var(--muted)]">Cliques detalhados do jogador</h2>
+              <FiChevronUp className={`h-5 w-5 text-[var(--muted)] transition-transform ${openPlayers ? "" : "rotate-180"}`} />
+            </button>
+            {openPlayers && (
+              <div className="border-t border-[var(--line)] px-4 pb-4 pt-8 sm:px-8">
+                <div className="flex justify-end">
+                  <Dots />
+                </div>
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Pesquisar por jogador..."
+                  className="mt-1 w-full max-w-[200px] rounded-lg border border-[var(--line)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+                />
+                <Empty className="mt-4 h-[200px]" />
+              </div>
             )}
           </section>
         </div>

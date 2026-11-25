@@ -214,7 +214,7 @@ function ReportEditor({
     // dia seguinte ao último (ou hoje, se a tabela estiver vazia)
     const [y, m, dd] = last ? last.date.split("-").map(Number) : [0, 0, 0];
     const d = last ? new Date(y, m - 1, dd + 1) : new Date();
-    const rows = [...r.rows, { date: isoDay(d), clicks: 0, signups: 0, ftd: 0, deposits: 0, flagged: 0 }];
+    const rows = [...r.rows, { date: isoDay(d), clicks: 0, signups: 0, ftd: 0, deposits: 0, ngr: 0, flagged: 0 }];
     set({ rows });
     setRowPage(Math.ceil(rows.length / PER_PAGE) - 1);
   }
@@ -472,13 +472,13 @@ function ReportEditor({
         {/* dias */}
         <section className="panel">
           <h2 className="panel-title">Dias (tabela e gráfico)</h2>
-          <p className="hint">Uma linha por dia. O gráfico do topo usa os depósitos; Semana e Mês somam os dias. Taxa de conversão = FTD ÷ cliques.</p>
+          <p className="hint">Uma linha por dia. O gráfico do topo mostra Cliques, FTDs ou NGR; Semana e Mês somam os dias. Taxa de conversão = FTD ÷ cliques.</p>
           {r.rows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="text-left text-xs text-[var(--muted)]">
-                    {["Data", "Cliques", "Inscrições", "FTD #", `Depósitos (${r.currency})`, "Sinalizado %", ""].map((h) => (
+                    {["Data", "Cliques", "Inscrições", "FTD #", `Depósitos (${r.currency})`, `NGR (${r.currency})`, "Sinalizado %", ""].map((h) => (
                       <th key={h} className="px-1 pb-2 font-bold">
                         {h}
                       </th>
@@ -495,7 +495,7 @@ function ReportEditor({
                           min={0}
                           step={step}
                           className="field !px-2 !py-1.5 tabular-nums"
-                          value={x[key]}
+                          value={x[key] ?? 0}
                           onChange={(e) => setRow(i, { [key]: Math.max(0, Number(e.target.value) || 0) })}
                         />
                       </td>
@@ -509,6 +509,7 @@ function ReportEditor({
                         {numCell("signups")}
                         {numCell("ftd")}
                         {numCell("deposits", "0.01")}
+                        {numCell("ngr", "0.01")}
                         {numCell("flagged", "0.01")}
                         <td className="px-1 py-1">
                           <button type="button" onClick={() => set({ rows: r.rows.filter((_, j) => j !== i) })} className="p-1.5 text-red-300" aria-label="Remover dia">

@@ -32,7 +32,7 @@ export function cleanReport(raw: unknown): Report | null {
     ? r.rows
         .map((x) => {
           const o = (x ?? {}) as Record<string, unknown>;
-          return { date: str(o.date, 10), clicks: num(o.clicks), signups: num(o.signups), ftd: num(o.ftd), deposits: num(o.deposits), flagged: Math.min(100, num(o.flagged)) };
+          return { date: str(o.date, 10), clicks: num(o.clicks), signups: num(o.signups), ftd: num(o.ftd), deposits: num(o.deposits), ngr: num(o.ngr), flagged: Math.min(100, num(o.flagged)) };
         })
         .filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date))
         .sort((a, b) => a.date.localeCompare(b.date))

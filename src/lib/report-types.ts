@@ -45,7 +45,7 @@ export function compose(kind: MetricKind, raw: string, currency: Currency): stri
 }
 
 /** Uma linha por dia da tabela "Análise de desempenho" */
-export type ReportRow = { date: string; clicks: number; signups: number; ftd: number; deposits: number; flagged: number };
+export type ReportRow = { date: string; clicks: number; signups: number; ftd: number; deposits: number; ngr: number; flagged: number };
 
 export type Report = {
   slug: string;
@@ -77,9 +77,12 @@ export const DEFAULT_METRICS: ReportMetric[] = [
   { label: "Cliques", value: "0", delta: "", kind: "num" },
   { label: "Inscrições", value: "0", delta: "", kind: "num" },
   { label: "FTD #", value: "0", delta: "", kind: "num" },
+  { label: "Depósitos #", value: "0", delta: "", kind: "num" },
+  { label: "Valor FTD", value: "$0.00", delta: "", kind: "money" },
   { label: "Quantidade de depósitos", value: "$0.00", delta: "", kind: "money" },
   { label: "Taxa de conversão", value: "0.0%", delta: "", kind: "pct" },
   { label: "Clique para se inscrever", value: "0.0%", delta: "", kind: "pct" },
+  { label: "NGR", value: "$0.00", delta: "", kind: "money" },
   { label: "Apostando", value: "0.00x", delta: "", kind: "mult" },
   { label: "Sinalizado", value: "0", delta: "", kind: "num" },
   { label: "% sinalizado", value: "0.0%", delta: "", kind: "pct" },
