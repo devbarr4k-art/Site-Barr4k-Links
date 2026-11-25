@@ -336,6 +336,14 @@ function ReportEditor({
               />
             </label>
           </div>
+          <label className="flex flex-col gap-1.5">
+            <span className="hint">Marcas do filtro (separadas por vírgula)</span>
+            <input
+              className="field"
+              defaultValue={(r.brands ?? []).join(", ")}
+              onChange={(e) => set({ brands: e.target.value.split(",").map((b) => b.trim()).filter(Boolean).slice(0, 40) })}
+            />
+          </label>
           <div className="flex items-center gap-3">
             <span className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent)] text-sm font-black">
               {r.userName.slice(0, 2).toUpperCase() || "B4"}

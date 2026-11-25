@@ -57,6 +57,8 @@ export type Report = {
   theme: ReportTheme;
   currency: Currency;
   metrics: ReportMetric[];
+  /** marcas que aparecem na gaveta Filtros */
+  brands: string[];
   rows: ReportRow[];
   updatedAt: string;
 };
@@ -88,6 +90,8 @@ export const DEFAULT_METRICS: ReportMetric[] = [
   { label: "% sinalizado", value: "0.0%", delta: "", kind: "pct" },
 ];
 
+export const DEFAULT_BRANDS = ["Lumebet", "Palmluck", "Betboxcasino", "Goldpotcasino", "Mistycasino", "Reysur", "Borawin", "Gran Pampa", "Bet Dahab", "Casino Plata", "Casinospino", "Casitoros", "Casitap"];
+
 export function emptyReport(slug = ""): Report {
   return {
     slug,
@@ -98,6 +102,7 @@ export function emptyReport(slug = ""): Report {
     theme: "grafite",
     currency: "$",
     metrics: DEFAULT_METRICS.map((m) => ({ ...m })),
+    brands: [...DEFAULT_BRANDS],
     rows: [],
     updatedAt: new Date().toISOString(),
   };

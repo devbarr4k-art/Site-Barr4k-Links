@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { blobReady } from "@/lib/config";
-import { compose, composeDelta, CURRENCIES, DEFAULT_METRICS, inferKind, METRIC_KINDS, rawOf, REPORT_THEMES, SLUG_RE, type MetricKind, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
+import { compose, composeDelta, CURRENCIES, DEFAULT_BRANDS, DEFAULT_METRICS, inferKind, METRIC_KINDS, rawOf, REPORT_THEMES, SLUG_RE, type MetricKind, type Report, type ReportMetric, type ReportRow } from "@/lib/report-types";
 
 // Cada painel = reports/<link>.json no Vercel Blob (mesmo esquema do site/config.json).
 // No PC sem o token, fica numa pasta temporária só pra testar.
@@ -48,6 +48,7 @@ export function cleanReport(raw: unknown): Report | null {
     theme: REPORT_THEMES.some((t) => t.key === r.theme) ? (r.theme as Report["theme"]) : "roxo",
     currency,
     metrics,
+    brands: Array.isArray(r.brands) ? r.brands.map((b) => str(b, 30)).filter(Boolean).slice(0, 40) : [...DEFAULT_BRANDS],
     rows,
     updatedAt: str(r.updatedAt, 40) || new Date().toISOString(),
   };
